@@ -1,0 +1,88 @@
+# Environment
+venv/
+Lib/
+Scripts/
+pyvenv.cfg
+Include/
+.env  # Secrets management (consider a dedicated secrets management solution)
+
+# Build, test, and coverage outputs
+*.py[cod]  # Compiled Python (.pyc, .pyo, etc.)
+__pycache__/
+local_settings.py  # Project-specific settings (consider environment variables)
+db.sqlite3  # Or your database file (use migrations for schema changes)
+
+# IDE and OS specific files
+*.swp  # Swap files
+*.swo  # Vim swap files
+*.sublime-project
+*.sublime-workspace
+.idea/
+Thumbs.db
+.DS_Store
+
+# Distribution / packaging
+dist/
+build/
+develop-eggs/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+*,cover
+.hypothesis/
+
+# Cache
+.cache
+
+# Static files (usually managed by a staticfiles app)
+static/*
+staticfiles/
+
+# Media files (usually for user-uploaded content)
+media/*
+
+# Logs
+*.log
+
+# IDE specific editor configuration (adjust for your IDE)
+.vscode/
+.spyderproject/
+.ropeproject/
+
+# Unit test / test runner / async test output (adjust as needed)
+.pytest_cache/
+tests/__pycache__/
+
+# Static files from a content delivery network (adjust if applicable)
+static_cdn/
+
+# Local documentation
+docs/_build/
+
+# Jupyter Notebook checkpoints (if applicable)
+.ipynb_checkpoints
+
+# Tailor for third-party extensions
+# (e.g., for django-allauth)
+# allauth/socialaccount/providers/*/migrations/
+
+# Tailored ignores for local development (if applicable)
+# mysite/local_settings.py
+
+# Tailored ignores for third-party libraries (if applicable)
+# some_library/binary_data
+
+# Remember to adjust for your specific project structure and preferences
