@@ -41,10 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core',
-    'acedamics',
+    'academics.apps.AcademicsConfig',
     'students',
-    'records'
+    'records',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -83,10 +83,15 @@ WSGI_APPLICATION = 'ERMS_System.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'main_project_db',
+        'USER': 'postgres',
+        'PASSWORD': '@Uzair401',
+        'HOST': 'localhost',  
+        'PORT': '5432',       
     }
 }
+
 
 
 # Password validation
