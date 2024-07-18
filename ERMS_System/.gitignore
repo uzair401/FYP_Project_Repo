@@ -49,7 +49,7 @@ htmlcov/
 
 # Static files (usually managed by a staticfiles app)
 static/*
-staticfiles/
+staticfiles/*
 
 # Media files (usually for user-uploaded content)
 media/*
