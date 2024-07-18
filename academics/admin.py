@@ -32,7 +32,7 @@ class ProgramAdmin(admin.ModelAdmin):
 
 @admin.register(Semester)
 class SemesterAdmin(admin.ModelAdmin):
-    list_display = ('semester_id', 'semester_number_ordered', 'semester_category', 'program')
+    list_display = ('semester_id', 'semester_number', 'semester_category', 'program')
     search_fields = ('semester_number', 'semester_category', 'program__program_name')
     list_filter = ('program', 'semester_category')
     inlines = [CourseInline]
