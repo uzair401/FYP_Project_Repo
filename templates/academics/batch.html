@@ -1,0 +1,18 @@
+{% extends "adminlte/base.html" %}
+{% block content %}
+<h1>Batches</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Batch Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for batch in batches %}
+        <tr>
+            <td><a href="{% url 'academics:semester' batch.program_id %}">{{ batch.batch_name }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

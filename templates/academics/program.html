@@ -1,0 +1,22 @@
+{% extends "adminlte/base.html" %}
+{% block content %}
+<h1>Programs</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Program Name</th>
+            <th>Program Code</th>
+        </tr>
+        
+    </thead>
+    <tbody>
+        {% for program in programs %}
+        <tr>
+            <td><a href="{% url 'academics:batch' program.program_id %}">{{ program.program_name }}</a></td>
+            <td><a href="{% url 'academics:batch' program.program_id %}">{{ program.program_code }}</a></td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,10 +1,7 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import logout
+from academics.models import Department 
 
 # Create your views here.
-def index(request):
-    pass
-def logout_view(request):
-    if request.method == "POST":
-        logout(request)
-        return redirect('/')
+def dashboard(request):
+    departments = Department.objects.all()
+    return render(request, 'core/dashboard.html', {'departments': departments})

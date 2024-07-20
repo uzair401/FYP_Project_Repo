@@ -16,15 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.contrib.auth import logout
-from core import views
+
 
 LOGOUT_REDIRECT_URL = '/'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('core', include('core.urls')),
-    path('records', include('records.urls')),
-    path('students', include('students.urls')),
-    path('acedamic', include('academics.urls')),
+    path('', include('core.urls',namespace='core')),
+    path('records/', include('records.urls',namespace='records')),
+    path('students/', include('students.urls', namespace='students')),
+    path('academics/', include('academics.urls', namespace='academics')),
 ]

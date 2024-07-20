@@ -28,7 +28,7 @@ class Semester(models.Model):
 
     def __str__(self):
         return f"{self.semester_number} - {self.semester_category} - {self.program.program_name}"
-    
+        
 
 class Course(models.Model):
     course_id = models.AutoField(primary_key=True)

@@ -1,0 +1,20 @@
+{% extends "adminlte/base.html" %}
+{% block content %}
+<h1>Departments</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Department Name</th>
+            <th>Department Discipline</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for department in departments %}
+        <tr>
+          <td><a href="{% url 'academics:program' department.department_id %}">{{ department.department_name }}</a></td>
+            <td>{{ department.department_discipline }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "adminlte/base.html" %}
+{% block content %}
+<h1>Programs</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Program Name</th>
+            <th>Program Code</th>
+        </tr>
+        
+    </thead>
+    <tbody>
+        {% for student in students %}
+        <tr>
+            <td>{{ student.student_name }}</a></td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
