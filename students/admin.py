@@ -17,7 +17,7 @@ class StudentSemesterRecordInline(admin.TabularInline):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('student_id', 'first_name', 'last_name', 'father_name', 'date_of_birth', 'registration_number', 'enrollment_year', 'status', 'department', 'program', 'batch')
+    list_display = ( 'first_name', 'last_name', 'father_name', 'date_of_birth', 'registration_number', 'enrollment_year', 'status', 'department', 'program', 'batch')
     search_fields = ('first_name', 'last_name', 'registration_number')
     list_filter = ('department', 'program', 'status')
     inlines = [EnrollmentInline, StudentExamRecordInline, StudentSemesterRecordInline]

@@ -1,21 +1,70 @@
+{# templates/students/student.html #}
 {% extends "adminlte/base.html" %}
-{% block content %}
-<h1>Programs</h1>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Program Name</th>
-            <th>Program Code</th>
-        </tr>
-        
-    </thead>
-    <tbody>
-        {% for student in students %}
-        <tr>
-            <td>{{ student.student_name }}</a></td>
+{% load static %}
 
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% block content %}
+<h1>Students Section</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Students</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% comment %} <form method="GET" action="{% url 'students:student' %}"> {% endcomment %}
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <select id="department" name="department" class="form-control">
+                            <option value="">All</option>
+                            {% for department in departments %}
+                                <option value="{{ department.id }}" {% if request.GET.department == department.id|stringformat:"s" %}selected{% endif %}>{{ department.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </form>
+
+                <table class="table table-striped mt-3">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Father's Name</th>
+                            <th>Date of Birth</th>
+                            <th>Registration Number</th>
+                            <th>Enrollment Year</th>
+                            <th>Status</th>
+                            <th>Department</th>
+                            <th>Program</th>
+                            <th>Batch</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.first_name }} {{ student.last_name }}</td>
+                            <td>{{ student.father_name }}</td>
+                            <td>{{ student.date_of_birth }}</td>
+                            <td>{{ student.registration_number }}</td>
+                            <td>{{ student.enrollment_year }}</td>
+                            <td>{{ student.status }}</td>
+                            <td>{{ student.department.name }}</td>
+                            <td>{{ student.program.name }}</td>
+                            <td>{{ student.batch.name }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
