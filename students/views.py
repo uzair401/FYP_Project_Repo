@@ -1,25 +1,39 @@
 # students/views.py
-from django.contrib.admin.sites import site
-from django.shortcuts import render
-from django.utils.decorators import method_decorator
-from django.contrib.admin.views.decorators import staff_member_required
-from django.views.generic import TemplateView
-from .models import Student
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from .models import Student, Department, Program, Batch
 
-@method_decorator(staff_member_required, name='dispatch')
-class student(TemplateView):
-    template_name = 'students/students.html'
+def student(request):
+    students = Student.objects.all()
+    departments = Department.objects.all()
+    programs = Program.objects.all()
+    batches = Batch.objects.all()
+    statuses = Student.STUDENT_STATUS_CHOICES  # Get status choices directly from the model
+    return render(request, 'students/students.html', {
+        'students': students,
+        'departments': departments,
+        'programs': programs,
+        'batches': batches,
+        'statuses': statuses  # Pass statuses to the template
+    })
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Get admin filters for the model
-        admin_filters = site._registry[Student].get_list_filter(request=self.request)
-        context['admin_filters'] = admin_filters
-        context['students'] = Student.objects.all()
-        return context
-
-
-# def student(request, course_id):
-#     # Query students who are enrolled in the given course_id
-#     students = Student.objects.filter(enrollments__course_id=course_id)
-#     return render(request, 'students/students.html', {'students': students})
+def add_student(request):
+    if request.method == 'POST':
+        try:
+            student = Student(
+                first_name=request.POST.get('first_name'),
+                last_name=request.POST.get('last_name'),
+                father_name=request.POST.get('father_name'),
+                date_of_birth=request.POST.get('date_of_birth'),
+                registration_number = request.POST.get('registration_number', '').upper(),
+                enrollment_year=request.POST.get('enrollment_year'),
+                status=request.POST.get('status'),
+                department_id=request.POST.get('department'),
+                program_id=request.POST.get('program'),
+                batch_id=request.POST.get('batch')
+            )
+            student.save()
+            return JsonResponse({'success': True, 'message': f'{student.first_name} added successfully'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': 'Student adding error: ' + str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request'})
