@@ -1,5 +1,6 @@
 {% load adminlte_helpers i18n %}
-{% load static %}<!DOCTYPE html>
+{% load static %}
+<!DOCTYPE html>
 <html>
 <head>
     {% block title_outer %}
@@ -14,6 +15,9 @@
 
     {% block stylesheets %}
         {% include 'adminlte/lib/_styles.html' %}
+        <link rel="stylesheet" href="{% static 'adminlte/plugins/fontawesome-free/css/all.min.css' %}">
+        <link rel="stylesheet" href="{% static 'adminlte/dist/css/adminlte.min.css' %}">
+        {% include 'core/_datatable_setup.html' %}
     {% endblock %}
 
     {% block extra_head %}{% endblock %}
@@ -77,8 +81,11 @@
 {% include 'adminlte/lib/_scripts.html' %}
 {% endblock %}
 
-{% block extra_js %}{% endblock %}
+{% block extra_js %}
+    {% include 'core/_datatable_setup.html' %}
+{% endblock %}
 
 {% block extra_foot %}{% endblock %}
+
 </body>
 </html>
