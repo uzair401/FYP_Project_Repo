@@ -49,7 +49,8 @@ def student_delete(request, student_id):
     if request.method == 'POST':
         student.delete()
         return JsonResponse({'success': True, 'message': f'Student {student.first_name} {student.last_name} deleted successfully.'})
-    return redirect('students:student')
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
 
 
 # # students/views.py
