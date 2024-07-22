@@ -1,13 +1,38 @@
 # academics/views.py
-from django.urls import reverse_lazy
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .models import Department, Program, Semester, Course, Batch
-from .forms import ProgramForm, SemesterForm, CourseForm, BatchForm
+from .forms import DepartmentForm, ProgramForm, SemesterForm, CourseForm, BatchForm
 
-def program(request, department_id):
-    programs = Program.objects.filter(department_id=department_id)
-    return render(request, 'academics/program.html', {'programs': programs})
+
+def departments(request):
+        departments = Department.objects.all()
+        form = DepartmentForm()
+        return render(request, 'academics/departments.html', {
+        'departments': departments,'form':form
+    })
+def add_department(request):
+    if request.method == 'POST':
+        form = DepartmentForm(request.POST)
+        if form.is_valid():
+            department = form.save()
+            return JsonResponse({'success': True, 'message': f'{department.department_name} added successfully'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Department adding error: ' + str(form.errors)})
+    return JsonResponse({'success': False, 'message': 'Invalid request'})
+def program(request):
+     programs=Program.objects.all()
+     form = ProgramForm()
+     return render(request, 'academics/program.html', {'programs': programs, 'form': form})
+def add_department(request):
+    if request.method == 'POST':
+        form = ProgramForm(request.POST)
+        if form.is_valid():
+            program = form.save()
+            return JsonResponse({'success': True, 'message': f'{program.program_name} added successfully'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Department adding error: ' + str(form.errors)})
+    return JsonResponse({'success': False, 'message': 'Invalid request'})
 
 def batch(request, program_id):
     batches = Batch.objects.filter(program_id=program_id)
@@ -20,6 +45,7 @@ def semester(request, program_id):
 def course(request, semester_id):
     courses = Course.objects.filter(semester_id=semester_id)
     return render(request, 'academics/course.html', {'courses': courses})
+
 # # Program Views
 # class ProgramListView(ListView):
 #     model = Program

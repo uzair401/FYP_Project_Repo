@@ -12,6 +12,9 @@ from . import views
 app_name = 'academics'
 urlpatterns = [
     path('<int:department_id>/', views.program, name="program"),
+    path('departments/', views.departments, name="departments"),
+    path('add_department/', views.add_department, name="add_department"),
+
     path('batch/<int:program_id>/', views.batch, name="batch"),
     path('semester/<int:program_id>/', views.semester, name="semester"),
     path('course/<int:semester_id>/', views.course, name="course"),

@@ -21,7 +21,9 @@ class Student(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='students')
     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='students_enrolled')
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='students')
-
+    def save(self, *args, **kwargs):
+        self.registration_number = self.registration_number.upper()
+        super(Student, self).save(*args, **kwargs)
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
