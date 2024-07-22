@@ -2,6 +2,31 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.1.0/css/buttons.dataTables.min.css">
 
+<!-- Custom CSS styles -->
+<style>
+    .btn-success {
+        background-color: #4CAF50 !important;
+        color: #fff !important;
+    }
+
+    .btn-info {
+        background-color: #2196F3 !important;
+        color: #fff !important;
+    }
+
+    .pdf-button {
+        margin-right: 10px;
+    }
+
+    .excel-button {
+        margin-right: 10px;
+    }
+
+    .print-button {
+        margin-right: 10px;
+    }
+</style>
+
 <!-- Include DataTables JS -->
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js"></script>
@@ -12,23 +37,24 @@
 <script>
     $(document).ready(function() {
         $('#students-table').DataTable({
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"B>>' +
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f,B>>' +
                  '<"row"<"col-sm-12"tr>>' +
                  '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                 
             buttons: [
                 {
                     extend: 'pdfHtml5',
-                    className: 'btn btn-success float-right',
+                    className: 'btn btn-success float-right pdf-button',
                     text: 'PDF'
                 },
                 {
                     extend: 'excelHtml5',
-                    className: 'buttons-excel buttons-html5 btn btn-success ',
+                    className: 'buttons-excel buttons-html5 btn btn-success excel-button',
                     text: 'Excel'
                 },
                 {
                     extend: 'print',
-                    className: 'btn btn-info float-right',
+                    className: 'btn  btn-info float-right print-button',
                     text: 'Print'
                 }
             ],

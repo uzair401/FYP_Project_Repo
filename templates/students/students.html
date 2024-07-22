@@ -16,6 +16,7 @@
                 <table id="students-table" class="table table-striped table-bordered mt-3">
                     <thead>
                         <tr>
+                            <th>S.No</th>
                             <th>Student Name</th>
                             <th>Father's Name</th>
                             <th>Date of Birth</th>
@@ -25,11 +26,13 @@
                             <th>Department</th>
                             <th>Program</th>
                             <th>Batch</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for student in students %}
                         <tr>
+                            <td>{{ forloop.counter }}</td>
                             <td>{{ student.first_name }} {{ student.last_name }}</td>
                             <td>{{ student.father_name }}</td>
                             <td>{{ student.date_of_birth }}</td>
@@ -39,8 +42,56 @@
                             <td>{{ student.department.department_name }}</td>
                             <td>{{ student.program.program_name }}</td>
                             <td>{{ student.batch.batch_name }}</td>
-                            
+                            <td>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateStudentModal{{ student.student_id }}">Update</button>
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteStudentModal{{ student.student_id }}">Delete</button>
+                            </td>
                         </tr>
+
+                        <!-- Update Student Modal -->
+                        <div class="modal fade" id="updateStudentModal{{ student.student_id }}" tabindex="-1" aria-labelledby="updateStudentModalLabel{{ student.student_id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form id="updateStudentForm{{ student.student_id }}" method="post" action="{% url 'students:student_update' student.student_id %}">
+                                        {% csrf_token %}
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="updateStudentModalLabel{{ student.student_id }}">Update Student</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Form fields -->
+                                            {{ update_forms.student.id.as_p }}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-primary">Save changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delete Student Modal -->
+                        <div class="modal fade" id="deleteStudentModal{{ student.student_id }}" tabindex="-1" aria-labelledby="deleteStudentModalLabel{{ student.student_id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form id="deleteStudentForm{{ student.student_id }}" method="post" action="{% url 'students:student_delete' student.student_id %}">
+                                        {% csrf_token %}
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteStudentModalLabel{{ student.student_id }}">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete {{ student.first_name }} {{ student.last_name }}?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -107,354 +158,117 @@
                         // Hide the modal
                         $('#addStudentModal').modal('hide');
                         
-                        // Reload the page after hiding the modal
+                        // Reload the page after a short delay
                         setTimeout(function() {
                             location.reload();
                         }, 500);
                     } else {
-                        // Display error message immediately if there's a failure
                         $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        
+                        // Hide the message after 2 seconds
+                        setTimeout(function() {
+                            $('#message-container').empty();
+                        }, 2000);
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('AJAX error:', status, error);
                     $('#message-container').html('<div class="alert alert-danger">An error occurred while adding the student.</div>');
+                    
+                    // Hide the message after 2 seconds
+                    setTimeout(function() {
+                        $('#message-container').empty();
+                    }, 2000);
+                }
+            });
+        });
+
+        // Handle update form submission via AJAX
+        $('form[id^="updateStudentForm"]').submit(function(event) {
+            event.preventDefault(); // Prevent the default form submission
+    
+            var formId = $(this).attr('id');
+            var studentId = formId.replace('updateStudentForm', '');
+            var updateForm = $(this);
+    
+            $.ajax({
+                type: 'POST',
+                url: updateForm.attr('action'),
+                data: updateForm.serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        // Set a flag in localStorage to display success message
+                        localStorage.setItem('successMessage', response.message);
+                        
+                        // Hide the modal
+                        $('#updateStudentModal' + studentId).modal('hide');
+                        
+                        // Reload the page after a short delay
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        
+                        // Hide the message after 2 seconds
+                        setTimeout(function() {
+                            $('#message-container').empty();
+                        }, 2000);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while updating the student.</div>');
+                    
+                    // Hide the message after 2 seconds
+                    setTimeout(function() {
+                        $('#message-container').empty();
+                    }, 2000);
+                }
+            });
+        });
+
+        // Handle delete form submission via AJAX
+        $('form[id^="deleteStudentForm"]').submit(function(event) {
+            event.preventDefault(); // Prevent the default form submission
+    
+            var formId = $(this).attr('id');
+            var studentId = formId.replace('deleteStudentForm', '');
+            var deleteForm = $(this);
+    
+            $.ajax({
+                type: 'POST',
+                url: deleteForm.attr('action'),
+                data: deleteForm.serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        // Set a flag in localStorage to display success message
+                        localStorage.setItem('successMessage', response.message);
+                        
+                        // Hide the modal
+                        $('#deleteStudentModal' + studentId).modal('hide');
+                        
+                        // Reload the page after a short delay
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        
+                        // Hide the message after 2 seconds
+                        setTimeout(function() {
+                            $('#message-container').empty();
+                        }, 2000);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while deleting the student.</div>');
+                    
+                    // Hide the message after 2 seconds
+                    setTimeout(function() {
+                        $('#message-container').empty();
+                    }, 2000);
                 }
             });
         });
     });
 </script>
-
 {% endblock %}
-
-
-
-{% comment %} {% extends "adminlte/base.html" %}
-{% load static %}
-
-{% block content %}
-<h1>Students Section</h1>
-
-<!-- Message Container -->
-<div id="message-container" class="alert-container"></div>
-
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Students</h3>
-                <button class="btn btn-success float-right" data-bs-toggle="modal" data-bs-target="#addStudentModal">Add Student</button>
-            </div>
-            <div class="card-body">
-                <table class="table table-striped mt-3">
-                    <thead>
-                        <tr>
-                            <th>Student Name</th>
-                            <th>Father's Name</th>
-                            <th>Date of Birth</th>
-                            <th>Registration Number</th>
-                            <th>Enrollment Year</th>
-                            <th>Status</th>
-                            <th>Department</th>
-                            <th>Program</th>
-                            <th>Batch</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for student in students %}
-                        <tr>
-                            <td>{{ student.first_name }} {{ student.last_name }}</td>
-                            <td>{{ student.father_name }}</td>
-                            <td>{{ student.date_of_birth }}</td>
-                            <td>{{ student.registration_number }}</td>
-                            <td>{{ student.enrollment_year }}</td>
-                            <td>{{ student.get_status_display }}</td>
-                            <td>{{ student.department.department_name }}</td>
-                            <td>{{ student.program.program_name }}</td>
-                            <td>{{ student.batch.batch_name }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Add Student Modal -->
-<div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form id="addStudentForm" method="post" action="{% url 'students:add_student' %}">
-                {% csrf_token %}
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addStudentModalLabel">Add Student</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Form fields -->
-                    {% for field in form %}
-                    <div class="form-group">
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.help_text %}
-                        <small class="form-text text-muted">{{ field.help_text }}</small>
-                        {% endif %}
-                        {% for error in field.errors %}
-                        <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    {% endfor %}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    $(document).ready(function() {
-        // Check if there is a success message in localStorage
-        var successMessage = localStorage.getItem('successMessage');
-        if (successMessage) {
-            // Display success message
-            $('#message-container').html('<div class="alert alert-success">' + successMessage + '</div>');
-            // Remove the success message from localStorage after displaying it
-            localStorage.removeItem('successMessage');
-            
-            // Hide the message after 2 seconds
-            setTimeout(function() {
-                $('#message-container').empty();
-            }, 2000);
-        }
-
-        // Handle form submission via AJAX
-        $('#addStudentForm').submit(function(event) {
-            event.preventDefault(); // Prevent the default form submission
-    
-            $.ajax({
-                type: 'POST',
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        // Set a flag in localStorage to display success message
-                        localStorage.setItem('successMessage', response.message);
-                        
-                        // Reload the page immediately
-                        location.reload();
-                    } else {
-                        // Display error message immediately if there's a failure
-                        var $messageContainer = $('#message-container');
-                        $messageContainer.empty(); // Clear previous messages
-                        $('<div class="alert alert-danger">' + response.message + '</div>').appendTo($messageContainer);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX error:', status, error);
-                    var $messageContainer = $('#message-container');
-                    $messageContainer.empty(); // Clear previous messages
-                    $('<div class="alert alert-danger">An error occurred while adding the student.</div>').appendTo($messageContainer);
-                }
-            });
-        });
-    });
-</script>
-
-{% endblock %} {% endcomment %}
-
-
-{% comment %} {% extends "adminlte/base.html" %}
-{% load static %}
-
-{% block content %}
-<h1>Students Section</h1>
-
-<!-- Message Container -->
-<div id="message-container" class="alert-container"></div>
-
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Students</h3>
-                <button class="btn btn-success float-right" data-toggle="modal" data-target="#addStudentModal">Add Student</button>
-            </div>
-            <div class="card-body">
-                <table class="table table-striped mt-3">
-                    <thead>
-                        <tr>
-                            <th>Student Name</th>
-                            <th>Father's Name</th>
-                            <th>Date of Birth</th>
-                            <th>Registration Number</th>
-                            <th>Enrollment Year</th>
-                            <th>Status</th>
-                            <th>Department</th>
-                            <th>Program</th>
-                            <th>Batch</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for student in students %}
-                        <tr>
-                            <td>{{ student.first_name }} {{ student.last_name }}</td>
-                            <td>{{ student.father_name }}</td>
-                            <td>{{ student.date_of_birth }}</td>
-                            <td>{{ student.registration_number }}</td>
-                            <td>{{ student.enrollment_year }}</td>
-                            <td>{{ student.get_status_display }}</td>
-                            <td>{{ student.department.department_name }}</td>
-                            <td>{{ student.program.program_name }}</td>
-                            <td>{{ student.batch.batch_name }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Add Student Modal -->
-<div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog" aria-labelledby="addStudentModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form id="addStudentForm" method="post" action="{% url 'students:add_student' %}">
-                {% csrf_token %}
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addStudentModalLabel">Add Student</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <!-- Form fields -->
-                    <div class="form-group">
-                        <label for="id_first_name">First Name</label>
-                        <input type="text" class="form-control" id="id_first_name" name="first_name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_last_name">Last Name</label>
-                        <input type="text" class="form-control" id="id_last_name" name="last_name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_father_name">Father's Name</label>
-                        <input type="text" class="form-control" id="id_father_name" name="father_name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_date_of_birth">Date of Birth</label>
-                        <input type="date" class="form-control" id="id_date_of_birth" name="date_of_birth" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_registration_number">Registration Number</label>
-                        <input type="text" class="form-control" id="id_registration_number" name="registration_number" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_enrollment_year">Enrollment Year</label>
-                        <input type="number" class="form-control" id="id_enrollment_year" name="enrollment_year" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_status">Status</label>
-                        <select class="form-control" id="id_status" name="status" required>
-                            {% for status, display in statuses %}
-                            <option value="{{ status }}">{{ display }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_department">Department</label>
-                        <select class="form-control" id="id_department" name="department" required>
-                            <option value="">Select Department</option>
-                            {% for department in departments %}
-                            <option value="{{ department.department_id }}">{{ department.department_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_program">Program</label>
-                        <select class="form-control" id="id_program" name="program" required>
-                            <option value="">Select Program</option>
-                            {% for program in programs %}
-                            <option value="{{ program.program_id }}">{{ program.program_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_batch">Batch</label>
-                        <select class="form-control" id="id_batch" name="batch" required>
-                            <option value="">Select Batch</option>
-                            {% for batch in batches %}
-                            <option value="{{ batch.batch_id }}">{{ batch.batch_name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    $(document).ready(function() {
-        // Check if there is a success message in localStorage
-        var successMessage = localStorage.getItem('successMessage');
-        if (successMessage) {
-            // Display success message
-            $('#message-container').html('<div class="alert alert-success">' + successMessage + '</div>');
-            // Remove the success message from localStorage after displaying it
-            localStorage.removeItem('successMessage');
-            
-            // Hide the message after 2 seconds
-            setTimeout(function() {
-                $('#message-container').empty();
-            }, 2000);
-        }
-
-        // Handle form submission via AJAX
-        $('#addStudentForm').submit(function(event) {
-            event.preventDefault(); // Prevent the default form submission
-    
-            $.ajax({
-                type: 'POST',
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        // Set a flag in localStorage to display success message
-                        localStorage.setItem('successMessage', response.message);
-                        
-                        // Reload the page immediately
-                        location.reload();
-                    } else {
-                        // Display error message immediately if there's a failure
-                        var $messageContainer = $('#message-container');
-                        $messageContainer.empty(); // Clear previous messages
-                        $('<div class="alert alert-danger">' + response.message + '</div>').appendTo($messageContainer);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX error:', status, error);
-                    var $messageContainer = $('#message-container');
-                    $messageContainer.empty(); // Clear previous messages
-                    $('<div class="alert alert-danger">An error occurred while adding the student.</div>').appendTo($messageContainer);
-                }
-            });
-        });
-    });
-</script>
-
-{% endblock %} {% endcomment %}
