@@ -30,23 +30,23 @@
                             <td>{{ department.department_discipline }}</td>
                             <td>{{ department.department_description }}</td>
                             <td>
-                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateDepartmentModal{{ department.id }}">Update</button>
-                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteDepartmentModal{{ department.id }}">Delete</button>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateDepartmentModal{{ department.department_id }}">Update</button>
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteDepartmentModal{{ department.department_id }}">Delete</button>
                             </td>
                         </tr>
 
                         <!-- Update Department Modal -->
-                        <div class="modal fade" id="updateDepartmentModal{{ department.id }}" tabindex="-1" aria-labelledby="updateDepartmentModalLabel{{ department.id }}" aria-hidden="true">
+                        <div class="modal fade" id="updateDepartmentModal{{ department.department_id }}" tabindex="-1" aria-labelledby="updateDepartmentModalLabel{{ department.department_id }}" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <form id="updateDepartmentForm{{ department.department_id }}" method="post" action="{% url 'academics:department_update' department.department_id %}">
                                         {% csrf_token %}
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="updateDepartmentModalLabel{{ department.id }}">Update Department</h5>
+                                            <h5 class="modal-title" id="updateDepartmentModalLabel{{ department.department_id }}">Update Department</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            {{ update_forms.department.id.as_p }}
+                                            {{ update_forms.department.department_id.as_p }}
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -58,13 +58,13 @@
                         </div>
 
                         <!-- Delete Department Modal -->
-                        <div class="modal fade" id="deleteDepartmentModal{{ department.id }}" tabindex="-1" aria-labelledby="deleteDepartmentModalLabel{{ department.id }}" aria-hidden="true">
+                        <div class="modal fade" id="deleteDepartmentModal{{ department.department_id }}" tabindex="-1" aria-labelledby="deleteDepartmentModalLabel{{ department.department_id }}" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form id="deleteDepartmentForm{{ department.id }}" method="post" action="{% url 'academics:department_delete' department.department_id %}">
+                                    <form id="deleteDepartmentForm{{ department.department_id }}" method="post" action="{% url 'academics:department_delete' department.department_id %}">
                                         {% csrf_token %}
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="deleteDepartmentModalLabel{{ department.id }}">Confirm Delete</h5>
+                                            <h5 class="modal-title" id="deleteDepartmentModalLabel{{ department.department_id }}">Confirm Delete</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">

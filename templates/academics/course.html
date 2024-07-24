@@ -1,20 +1,278 @@
 {% extends "adminlte/base.html" %}
+{% load static %}
+
 {% block content %}
-<h1>Courses</h1>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Course Name</th>
-            <th>Course Code</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for course in courses %}
-        <tr>
-            <td><a href="{% url 'students:student' course.course_id %}">{{ course.course_name }}</a></td>
-            <td>{{ course.course_code }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<!-- Message Container -->
+<div id="message-container" class="alert-container"></div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><strong> Courses Section </strong></h3>
+                <button class="btn btn-success float-right" data-bs-toggle="modal" data-bs-target="#addCourseModal">Add Course</button>
+            </div>
+            <div class="card-body">
+                <table id="courses-table" class="table table-striped table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Course Name</th>
+                            <th>Course Code</th>
+                            <th>Credit Hours</th>
+                            <th>Internal Marks</th>
+                            <th>Mid Marks</th>
+                            <th>Final marks</th>
+                            <th>Total marks</th>
+                            <th>Semester</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in courses %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ course.course_name }}</td>
+                            <td>{{ course.course_code }}</td>
+                            <td>{{ course.credit_hours }}</td>
+                            <td>{{ course.internal_marks }}</td>
+                            <td>{{ course.mid_marks }}</td>
+                            <td>{{ course.final_marks }}</td>
+                            <td>{{ course.total_marks }}</td>
+                            <td>{{ course.semester.semester_number }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateCourseModal{{ course.course_id }}">Update</button>
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCourseModal{{ course.course_id }}">Delete</button>
+                            </td>
+                        </tr>
+
+                        <!-- Update Course Modal -->
+                        <div class="modal fade" id="updateCourseModal{{ course.course_id }}" tabindex="-1" aria-labelledby="updateCourseModalLabel{{ course.course_id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form id="updateCourseForm{{ course.course_id }}" method="post" action="{% url 'academics:course_update' course.course_id %}">
+                                        {% csrf_token %}
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="updateCourseModalLabel{{ course.course_id }}">Update Course</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {{ update_forms.course.as_p }}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-primary">Save changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delete Course Modal -->
+                        <div class="modal fade" id="deleteCourseModal{{ course.course_id }}" tabindex="-1" aria-labelledby="deleteCourseModalLabel{{ course.course_id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form id="deleteCourseForm{{ course.course_id }}" method="post" action="{% url 'academics:course_delete' course.course_id %}">
+                                        {% csrf_token %}
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteCourseModalLabel{{ course.course_id }}">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete {{ course.course_name }}?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Course Modal -->
+<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addCourseForm" method="post" action="{% url 'academics:add_course' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCourseModalLabel">Add Course</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form.as_p }} <!-- Render the form fields -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable with buttons
+        $('#courses-table').DataTable({
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"Bf>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    className: 'btn btn-success float-right pdf-button',
+                    text: 'PDF'
+                },
+                {
+                    extend: 'excelHtml5',
+                    className: 'btn btn-success excel-button',
+                    text: 'Excel'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn btn-info float-right print-button',
+                    text: 'Print'
+                }
+            ],
+            lengthMenu: [[25, 50, 100], [25, 50, 100]],
+            language: {
+                lengthMenu: "Show _MENU_ entries",
+                zeroRecords: "No records available",
+                info: "Showing page _PAGE_ of _PAGES_",
+                infoEmpty: "No records available",
+                infoFiltered: "(filtered from _MAX_ total records)",
+                search: "Search:",
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
+            }
+        });
+
+        // Check if there is a success message in localStorage
+        var successMessage = localStorage.getItem('successMessage');
+        if (successMessage) {
+            $('#message-container').html('<div class="alert alert-success">' + successMessage + '</div>');
+            localStorage.removeItem('successMessage');
+            setTimeout(function() {
+                $('#message-container').empty();
+            }, 2000);
+        }
+
+        // Handle form submission via AJAX for Add Course
+        $('#addCourseForm').submit(function(event) {
+            event.preventDefault();
+
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        $('#addCourseModal').modal('hide');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        setTimeout(function() {
+                            $('#message-container').empty();
+                        }, 2000);
+                    }
+                },
+                error: function() {
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while adding the course.</div>');
+                    setTimeout(function() {
+                        $('#message-container').empty();
+                    }, 2000);
+                }
+            });
+        });
+
+        // Handle form submission via AJAX for Update Course
+        $('form[id^="updateCourseForm"]').submit(function(event) {
+            event.preventDefault();
+
+            var formId = $(this).attr('id');
+            var courseId = formId.replace('updateCourseForm', '');
+            var updateForm = $(this);
+
+            $.ajax({
+                type: 'POST',
+                url: updateForm.attr('action'),
+                data: updateForm.serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        $('#updateCourseModal' + courseId).modal('hide');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        setTimeout(function() {
+                            $('#message-container').empty();
+                        }, 2000);
+                    }
+                },
+                error: function() {
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while updating the course.</div>');
+                    setTimeout(function() {
+                        $('#message-container').empty();
+                    }, 2000);
+                }
+            });
+        });
+
+        // Handle form submission via AJAX for Delete Course
+        $('form[id^="deleteCourseForm"]').submit(function(event) {
+            event.preventDefault();
+
+            var formId = $(this).attr('id');
+            var courseId = formId.replace('deleteCourseForm', '');
+            var deleteForm = $(this);
+
+            $.ajax({
+                type: 'POST',
+                url: deleteForm.attr('action'),
+                data: deleteForm.serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        $('#deleteCourseModal' + courseId).modal('hide');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        setTimeout(function() {
+                            $('#message-container').empty();
+                        }, 2000);
+                    }
+                },
+                error: function() {
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while deleting the course.</div>');
+                    setTimeout(function() {
+                        $('#message-container').empty();
+                    }, 2000);
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

@@ -9,45 +9,49 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><strong> Semesters Section </strong></h3>
-                <button class="btn btn-success float-right" data-bs-toggle="modal" data-bs-target="#addSemesterModal">Add Semester</button>
+                <h3 class="card-title"><strong> Batch Section </strong></h3>
+                <button class="btn btn-success float-right" data-bs-toggle="modal" data-bs-target="#addBatchModal">Add Batch</button>
             </div>
             <div class="card-body">
-                <table id="semesters-table" class="table table-striped table-bordered mt-3">
+                <table id="batches-table" class="table table-striped table-bordered mt-3">
                     <thead>
                         <tr>
                             <th>S.No</th>
-                            <th>Semester Number</th>
-                            <th>Semester Session</th>
+                            <th>Batch Name</th>
+                            <th>Batch year</th>
+                            <th>Batch Number</th>
+                            <th>Batch Session</th>
                             <th>Program</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for semester in semesters %}
+                        {% for batch in batches %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ semester.semester_number }}</td>
-                            <td>{{ semester.semester_category }}</td>
-                            <td>{{ semester.program.program_name }}</td>
+                            <td>{{ batch.batch_name }}</td>
+                            <td>{{ batch.batch_year }}</td>
+                            <td>{{ batch.batch_number }}</td>
+                            <td>{{ batch.batch_session }}</td>
+                            <td>{{ batch.program.program_name }}</td>
                             <td>
-                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateSemesterModal{{ semester.semester_id }}">Update</button>
-                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteSemesterModal{{ semester.semester_id }}">Delete</button>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateBatchModal{{ batch.batch_id }}">Update</button>
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteBatchModal{{ batch.batch_id }}">Delete</button>
                             </td>
                         </tr>
 
-                        <!-- Update Semester Modal -->
-                        <div class="modal fade" id="updateSemesterModal{{ semester.semester_id }}" tabindex="-1" aria-labelledby="updateSemesterModalLabel{{ semester.semester_id }}" aria-hidden="true">
+                        <!-- Update Batch Modal -->
+                        <div class="modal fade" id="updateBatchModal{{ batch.batch_id }}" tabindex="-1" aria-labelledby="updateBatchModalLabel{{ batch.batch_id }}" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form id="updateSemesterForm{{ semester.semester_id }}" method="post" action="{% url 'academics:semester_update' semester.semester_id %}">
+                                    <form id="updateBatchForm{{ batch.batch_id }}" method="post" action="{% url 'academics:batch_update' batch.batch_id %}">
                                         {% csrf_token %}
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="updateSemesterModalLabel{{ semester.semester_id }}">Update Semester</h5>
+                                            <h5 class="modal-title" id="updateBatchModalLabel{{ batch.batch_id }}">Update Batch</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            {{ update_forms.semester.as_p }}
+                                            {{ update_forms.batch.as_p }}
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -58,18 +62,18 @@
                             </div>
                         </div>
 
-                        <!-- Delete Semester Modal -->
-                        <div class="modal fade" id="deleteSemesterModal{{ semester.semester_id }}" tabindex="-1" aria-labelledby="deleteSemesterModalLabel{{ semester.semester_id }}" aria-hidden="true">
+                        <!-- Delete Batch Modal -->
+                        <div class="modal fade" id="deleteBatchModal{{ batch.batch_id }}" tabindex="-1" aria-labelledby="deleteBatchModalLabel{{ batch.batch_id }}" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form id="deleteSemesterForm{{ semester.semester_id }}" method="post" action="{% url 'academics:semester_delete' semester.semester_id %}">
+                                    <form id="deleteBatchForm{{ batch.batch_id }}" method="post" action="{% url 'academics:batch_delete' batch.batch_id %}">
                                         {% csrf_token %}
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="deleteSemesterModalLabel{{ semester.semester_id }}">Confirm Delete</h5>
+                                            <h5 class="modal-title" id="deleteBatchModalLabel{{ batch.batch_id }}">Confirm Delete</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            Are you sure you want to delete {{ semester.semester_number }}?
+                                            Are you sure you want to delete {{ batch.batch_name }}?
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -87,14 +91,14 @@
     </div>
 </div>
 
-<!-- Add Semester Modal -->
-<div class="modal fade" id="addSemesterModal" tabindex="-1" aria-labelledby="addSemesterModalLabel" aria-hidden="true">
+<!-- Add Batch Modal -->
+<div class="modal fade" id="addBatchModal" tabindex="-1" aria-labelledby="addBatchModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="addSemesterForm" method="post" action="{% url 'academics:add_semester' %}">
+            <form id="addBatchForm" method="post" action="{% url 'academics:add_batch' %}">
                 {% csrf_token %}
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addSemesterModalLabel">Add Semester</h5>
+                    <h5 class="modal-title" id="addBatchModalLabel">Add Batch</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -115,7 +119,7 @@
 <script>
     $(document).ready(function() {
         // Initialize DataTable with buttons
-        $('#semesters-table').DataTable({
+        $('#batches-table').DataTable({
             dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"Bf>>' +
                  '<"row"<"col-sm-12"tr>>' +
                  '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
@@ -163,8 +167,8 @@
             }, 2000);
         }
 
-        // Handle form submission via AJAX for Add Semester
-        $('#addSemesterForm').submit(function(event) {
+        // Handle form submission via AJAX for Add Batch
+        $('#addBatchForm').submit(function(event) {
             event.preventDefault();
 
             $.ajax({
@@ -174,7 +178,7 @@
                 success: function(response) {
                     if (response.success) {
                         localStorage.setItem('successMessage', response.message);
-                        $('#addSemesterModal').modal('hide');
+                        $('#addBatchModal').modal('hide');
                         setTimeout(function() {
                             location.reload();
                         }, 500);
@@ -186,7 +190,7 @@
                     }
                 },
                 error: function() {
-                    $('#message-container').html('<div class="alert alert-danger">An error occurred while adding the semester.</div>');
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while adding the batch.</div>');
                     setTimeout(function() {
                         $('#message-container').empty();
                     }, 2000);
@@ -194,12 +198,12 @@
             });
         });
 
-        // Handle form submission via AJAX for Update Semester
-        $('form[id^="updateSemesterForm"]').submit(function(event) {
+        // Handle form submission via AJAX for Update Batch
+        $('form[id^="updateBatchForm"]').submit(function(event) {
             event.preventDefault();
 
             var formId = $(this).attr('id');
-            var semesterId = formId.replace('updateSemesterForm', '');
+            var batchId = formId.replace('updateBatchForm', '');
             var updateForm = $(this);
 
             $.ajax({
@@ -209,7 +213,7 @@
                 success: function(response) {
                     if (response.success) {
                         localStorage.setItem('successMessage', response.message);
-                        $('#updateSemesterModal' + semesterId).modal('hide');
+                        $('#updateBatchModal' + batchId).modal('hide');
                         setTimeout(function() {
                             location.reload();
                         }, 500);
@@ -221,7 +225,7 @@
                     }
                 },
                 error: function() {
-                    $('#message-container').html('<div class="alert alert-danger">An error occurred while updating the semester.</div>');
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while updating the batch.</div>');
                     setTimeout(function() {
                         $('#message-container').empty();
                     }, 2000);
@@ -229,12 +233,12 @@
             });
         });
 
-        // Handle form submission via AJAX for Delete Semester
-        $('form[id^="deleteSemesterForm"]').submit(function(event) {
+        // Handle form submission via AJAX for Delete Batch
+        $('form[id^="deleteBatchForm"]').submit(function(event) {
             event.preventDefault();
 
             var formId = $(this).attr('id');
-            var semesterId = formId.replace('deleteSemesterForm', '');
+            var batchId = formId.replace('deleteBatchForm', '');
             var deleteForm = $(this);
 
             $.ajax({
@@ -244,7 +248,7 @@
                 success: function(response) {
                     if (response.success) {
                         localStorage.setItem('successMessage', response.message);
-                        $('#deleteSemesterModal' + semesterId).modal('hide');
+                        $('#deleteBatchModal' + batchId).modal('hide');
                         setTimeout(function() {
                             location.reload();
                         }, 500);
@@ -256,7 +260,7 @@
                     }
                 },
                 error: function() {
-                    $('#message-container').html('<div class="alert alert-danger">An error occurred while deleting the semester.</div>');
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while deleting the batch.</div>');
                     setTimeout(function() {
                         $('#message-container').empty();
                     }, 2000);
