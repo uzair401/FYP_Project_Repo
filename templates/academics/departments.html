@@ -113,6 +113,45 @@
 
 <script>
     $(document).ready(function() {
+        // Initialize DataTable with buttons
+        $('#departments-table').DataTable({
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"Bf>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    className: 'btn btn-success float-right pdf-button',
+                    text: 'PDF'
+                },
+                {
+                    extend: 'excelHtml5',
+                    className: 'buttons-excel buttons-html5 btn btn-success excel-button',
+                    text: 'Excel'
+                },
+                {
+                    extend: 'print',
+                    className: 'btn  btn-info float-right print-button',
+                    text: 'Print'
+                }
+            ],
+            lengthMenu: [[25, 50, 100], [25, 50, 100]],
+            language: {
+                lengthMenu: "Show _MENU_ entries",
+                zeroRecords: "No records available",
+                info: "Showing page _PAGE_ of _PAGES_",
+                infoEmpty: "No records available",
+                infoFiltered: "(filtered from _MAX_ total records)",
+                search: "Search:",
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
+            }
+        });
+
         // Check if there is a success message in localStorage
         var successMessage = localStorage.getItem('successMessage');
         if (successMessage) {
