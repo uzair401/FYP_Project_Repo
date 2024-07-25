@@ -3,7 +3,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from .models import Student, Department, Program, Batch
 from .forms import StudentForm
+from django.contrib.auth.decorators import login_required 
 
+@login_required
 def student(request):
     students = Student.objects.all()
     departments = Department.objects.all()
@@ -23,6 +25,7 @@ def student(request):
         'update_forms': update_forms,
     })
 
+@login_required
 def add_student(request):
     if request.method == 'POST':
         form = StudentForm(request.POST)
@@ -33,6 +36,7 @@ def add_student(request):
             return JsonResponse({'success': False, 'message': 'Student adding error: ' + str(form.errors)})
     return JsonResponse({'success': False, 'message': 'Invalid request'})
 
+@login_required
 def student_update(request, student_id):
     student = get_object_or_404(Student, student_id=student_id)
     if request.method == 'POST':
@@ -44,6 +48,7 @@ def student_update(request, student_id):
             return JsonResponse({'success': False, 'message': 'Failed to update student.', 'errors': form.errors})
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
+@login_required
 def student_delete(request, student_id):
     student = get_object_or_404(Student, student_id=student_id)
     if request.method == 'POST':

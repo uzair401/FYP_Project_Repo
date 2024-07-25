@@ -3,7 +3,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Department, Program, Semester, Course, Batch
 from .forms import DepartmentForm, ProgramForm, CourseForm, SemesterForm, BatchForm
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def department(request):
     departments = Department.objects.all()
     form = DepartmentForm()
@@ -18,6 +20,7 @@ def department(request):
     })
 
 @csrf_exempt
+@login_required
 def add_department(request):
     if request.method == 'POST':
         form = DepartmentForm(request.POST)
@@ -29,6 +32,7 @@ def add_department(request):
     return JsonResponse({'success': False, 'message': 'Invalid request'})
 
 @csrf_exempt
+@login_required
 def department_update(request, department_id):
     department = get_object_or_404(Department, department_id=department_id)
     if request.method == 'POST':
@@ -41,6 +45,7 @@ def department_update(request, department_id):
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 @csrf_exempt
+@login_required
 def department_delete(request, department_id):
     department = get_object_or_404(Department, department_id=department_id)
     if request.method == 'POST':
@@ -49,6 +54,7 @@ def department_delete(request, department_id):
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 # Program Section 
+@login_required
 def program(request):
     programs = Program.objects.all()
     form = ProgramForm()
@@ -63,6 +69,7 @@ def program(request):
     })
 
 @csrf_exempt
+@login_required
 def add_program(request):
     if request.method == 'POST':
         form = ProgramForm(request.POST)
@@ -74,6 +81,7 @@ def add_program(request):
     return JsonResponse({'success': False, 'message': 'Invalid request'})
 
 @csrf_exempt
+@login_required
 def program_update(request, program_id):
     program = get_object_or_404(Program, program_id=program_id)
     if request.method == 'POST':
@@ -86,6 +94,7 @@ def program_update(request, program_id):
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 @csrf_exempt
+@login_required
 def program_delete(request, program_id):
     program = get_object_or_404(Program, program_id=program_id)
     if request.method == 'POST':
@@ -94,6 +103,7 @@ def program_delete(request, program_id):
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 # Semester Section
+@login_required
 def semester(request):
     semesters = Semester.objects.all()
     form = SemesterForm()
@@ -108,6 +118,7 @@ def semester(request):
     })
 
 @csrf_exempt
+@login_required
 def add_semester(request):
     if request.method == 'POST':
         form = SemesterForm(request.POST)
@@ -119,6 +130,7 @@ def add_semester(request):
     return JsonResponse({'success': False, 'message': 'Invalid request'})
 
 @csrf_exempt
+@login_required
 def semester_update(request, semester_id):
     semester = get_object_or_404(Semester, semester_id=semester_id)
     if request.method == 'POST':
@@ -131,6 +143,7 @@ def semester_update(request, semester_id):
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 @csrf_exempt
+@login_required
 def semester_delete(request, semester_id):
     semester = get_object_or_404(Semester, semester_id=semester_id)
     if request.method == 'POST':
@@ -139,7 +152,7 @@ def semester_delete(request, semester_id):
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 # Course Section 
-
+@login_required
 def course(request):
     courses = Course.objects.all()
     form = CourseForm()
@@ -154,6 +167,7 @@ def course(request):
     })
 
 @csrf_exempt
+@login_required
 def add_course(request):
     if request.method == 'POST':
         form = CourseForm(request.POST)
@@ -165,6 +179,7 @@ def add_course(request):
     return JsonResponse({'success': False, 'message': 'Invalid request'})
 
 @csrf_exempt
+@login_required
 def course_update(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     if request.method == 'POST':
@@ -177,6 +192,7 @@ def course_update(request, course_id):
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 @csrf_exempt
+@login_required
 def course_delete(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     if request.method == 'POST':
@@ -185,6 +201,7 @@ def course_delete(request, course_id):
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 # Batch Section
+@login_required
 def batch(request):
     batches = Batch.objects.all()
     form = BatchForm()
@@ -199,6 +216,7 @@ def batch(request):
     })
 
 @csrf_exempt
+@login_required
 def add_batch(request):
     if request.method == 'POST':
         form = BatchForm(request.POST)
@@ -210,6 +228,7 @@ def add_batch(request):
     return JsonResponse({'success': False, 'message': 'Invalid request'})
 
 @csrf_exempt
+@login_required
 def batch_update(request, batch_id):
     batch = get_object_or_404(Batch, batch_id=batch_id)
     if request.method == 'POST':
@@ -222,6 +241,7 @@ def batch_update(request, batch_id):
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 @csrf_exempt
+@login_required
 def batch_delete(request, batch_id):
     batch = get_object_or_404(Batch, batch_id=batch_id)
     if request.method == 'POST':
