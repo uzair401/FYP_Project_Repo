@@ -19,7 +19,7 @@
                             <th>Department Name</th>
                             <th>Department Discipline</th>
                             <th>Department Description</th>
-                            <th>Actions</th>
+                            <th class="exclude">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -29,7 +29,7 @@
                             <td>{{ department.department_name }}</td>
                             <td>{{ department.department_discipline }}</td>
                             <td>{{ department.department_description }}</td>
-                            <td>
+                            <td class ="exclude">
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateDepartmentModal{{ department.department_id }}">Update</button>
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteDepartmentModal{{ department.department_id }}">Delete</button>
                             </td>
@@ -118,23 +118,32 @@
             dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"Bf>>' +
                  '<"row"<"col-sm-12"tr>>' +
                  '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-            buttons: [
-                {
-                    extend: 'pdfHtml5',
-                    className: 'btn btn-success float-right pdf-button',
-                    text: 'PDF'
-                },
-                {
-                    extend: 'excelHtml5',
-                    className: 'buttons-excel buttons-html5 btn btn-success excel-button',
-                    text: 'Excel'
-                },
-                {
-                    extend: 'print',
-                    className: 'btn  btn-info float-right print-button',
-                    text: 'Print'
-                }
-            ],
+                 buttons: [
+                 {
+                     extend: 'pdfHtml5',
+                     className: 'btn btn-success float-right pdf-button',
+                     text: 'PDF',
+                     exportOptions: {
+                         columns: ':not(.exclude)'
+                     }
+                 },
+                 {
+                     extend: 'excelHtml5',
+                     className: 'btn btn-success excel-button',
+                     text: 'Excel',
+                     exportOptions: {
+                         columns: ':not(.exclude)'
+                     }
+                 },
+                 {
+                     extend: 'print',
+                     className: 'btn btn-info float-right print-button',
+                     text: 'Print',
+                     exportOptions: {
+                         columns: ':not(.exclude)'
+                     }
+                 }
+             ],
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             language: {
                 lengthMenu: "Show _MENU_ entries",

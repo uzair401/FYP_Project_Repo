@@ -27,7 +27,7 @@
                             <th>Department</th>
                             <th>Program</th>
                             <th>Batch</th>
-                            <th>Actions</th>
+                            <th class="exclude">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -43,7 +43,7 @@
                             <td>{{ student.department.department_name }}</td>
                             <td>{{ student.program.program_name }}</td>
                             <td>{{ student.batch.batch_name }}</td>
-                            <td>
+                            <td class = "exclude">
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateStudentModal{{ student.student_id }}">Update</button>
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteStudentModal{{ student.student_id }}">Delete</button>
                             </td>

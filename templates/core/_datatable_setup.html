@@ -42,23 +42,32 @@
                  '<"row"<"col-sm-12"tr>>' +
                  '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
                  
-            buttons: [
-                {
-                    extend: 'pdfHtml5',
-                    className: 'btn btn-success float-right pdf-button',
-                    text: 'PDF'
-                },
-                {
-                    extend: 'excelHtml5',
-                    className: 'buttons-excel buttons-html5 btn btn-success excel-button',
-                    text: 'Excel'
-                },
-                {
-                    extend: 'print',
-                    className: 'btn  btn-info float-right print-button',
-                    text: 'Print'
-                }
-            ],
+                 buttons: [
+                 {
+                     extend: 'pdfHtml5',
+                     className: 'btn btn-success float-right pdf-button',
+                     text: 'PDF',
+                     exportOptions: {
+                         columns: ':not(.exclude)'
+                     }
+                 },
+                 {
+                     extend: 'excelHtml5',
+                     className: 'btn btn-success excel-button',
+                     text: 'Excel',
+                     exportOptions: {
+                         columns: ':not(.exclude)'
+                     }
+                 },
+                 {
+                     extend: 'print',
+                     className: 'btn btn-info float-right print-button',
+                     text: 'Print',
+                     exportOptions: {
+                         columns: ':not(.exclude)'
+                     }
+                 }
+             ],
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             language: {
                 lengthMenu: "Show _MENU_ entries",
