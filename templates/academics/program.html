@@ -1,6 +1,6 @@
 {% extends "adminlte/base.html" %}
 {% load static %}
-
+{% load custome_filters %}
 {% block content %}
 <!-- Message Container -->
 <div id="message-container" class="alert-container"></div>
@@ -18,7 +18,10 @@
                         <tr>
                             <th>S.No</th>
                             <th>Program Name</th>
+                            <th>Program Code</th>
+                            <th>Semesters</th>
                             <th>Department</th>
+                            <th>Program Description</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -27,7 +30,10 @@
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td>{{ program.program_name }}</td>
+                            <td>{{ program.program_code }}</td>
+                            <td>{{ program.numbers_of_semesters }}</td>
                             <td>{{ program.department.department_name }}</td>
+                            <td>{{ program.program_description }}</td>
                             <td>
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateProgramModal{{ program.program_id }}">Update</button>
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteProgramModal{{ program.program_id }}">Delete</button>
@@ -45,7 +51,7 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            {{ update_forms.program.as_p }}
+                                            {{ update_forms|get_item:program.program_id }}
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

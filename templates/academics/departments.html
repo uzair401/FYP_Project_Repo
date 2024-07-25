@@ -1,6 +1,6 @@
 {% extends "adminlte/base.html" %}
 {% load static %}
-
+{% load custome_filters %}
 {% block content %}
 <div id="message-container" class="alert-container"></div>
 
@@ -46,7 +46,7 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            {{ update_forms.department.department_id.as_p }}
+                                            {{ update_forms|get_item:department.department_id }}
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

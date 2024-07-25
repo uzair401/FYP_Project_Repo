@@ -1,6 +1,6 @@
 {% extends "adminlte/base.html" %}
 {% load static %}
-
+{% load custome_filters %}
 {% block content %}
 <!-- Message Container -->
 <div id="message-container" class="alert-container"></div>
@@ -25,6 +25,8 @@
                             <th>Final marks</th>
                             <th>Total marks</th>
                             <th>Semester</th>
+                            <th>Program</th>
+                            <th>Department</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -40,6 +42,8 @@
                             <td>{{ course.final_marks }}</td>
                             <td>{{ course.total_marks }}</td>
                             <td>{{ course.semester.semester_number }}</td>
+                            <td>{{ course.semester.program.program_name }}</td>
+                            <td>{{ course.semester.program.department.department_name }}</td>
                             <td>
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateCourseModal{{ course.course_id }}">Update</button>
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCourseModal{{ course.course_id }}">Delete</button>
@@ -57,7 +61,7 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            {{ update_forms.course.as_p }}
+                                            {{ update_forms|get_item:course.course_id }}
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

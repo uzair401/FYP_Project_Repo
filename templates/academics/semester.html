@@ -1,6 +1,6 @@
 {% extends "adminlte/base.html" %}
 {% load static %}
-
+{% load custome_filters %}
 {% block content %}
 <!-- Message Container -->
 <div id="message-container" class="alert-container"></div>
@@ -20,6 +20,7 @@
                             <th>Semester Number</th>
                             <th>Semester Session</th>
                             <th>Program</th>
+                            <th>Department</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -30,6 +31,7 @@
                             <td>{{ semester.semester_number }}</td>
                             <td>{{ semester.semester_category }}</td>
                             <td>{{ semester.program.program_name }}</td>
+                            <td>{{ semester.program.department.department_name }}</td>
                             <td>
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateSemesterModal{{ semester.semester_id }}">Update</button>
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteSemesterModal{{ semester.semester_id }}">Delete</button>
@@ -47,7 +49,7 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            {{ update_forms.semester.as_p }}
+                                            {{ update_forms|get_item:semester.semester_id }}
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
