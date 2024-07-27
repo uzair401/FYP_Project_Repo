@@ -28,8 +28,3 @@ class EnrollmentAdmin(admin.ModelAdmin):
     search_fields = ('student__first_name', 'student__last_name', 'course__course_name')
     list_filter = ('student__program', 'course__semester')
 
-@admin.register(Batch)
-class BatchAdmin(admin.ModelAdmin):
-    list_display = ('batch_id', 'batch_name', 'batch_year', 'batch_number', 'batch_session', 'program')
-    search_fields = ('batch_name', 'batch_session')
-    list_filter = ('program',)
