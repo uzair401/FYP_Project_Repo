@@ -15,8 +15,8 @@
 
     {% block stylesheets %}
         {% include 'adminlte/lib/_styles.html' %}
-        <link rel="stylesheet" href="{% static 'adminlte/plugins/fontawesome-free/css/all.min.css' %}">
-        <link rel="stylesheet" href="{% static 'adminlte/dist/css/adminlte.min.css' %}">
+        <link rel="stylesheet" href="{% static 'admin-lte/plugins/fontawesome-free/css/all.min.css' %}">
+        <link rel="stylesheet" href="{% static 'admin-lte/dist/css/adminlte.min.css' %}">
         {% include 'core/_datatable_setup.html' %}
     {% endblock %}
 
@@ -39,28 +39,30 @@
             {% block content_header %}
                 <section class="content-header">
                     {% block no_heading %}
-                        <h1>
-                            {% block page_name %}{% endblock %}
-                            <div class="header-actions">
-                                {% block page_actions %}{% endblock %}
-                            </div>
-                            {% block no_description %}
-                            <small>{% block page_description %}{% endblock %}</small>
+                        <div class="header-content">
+                            <h1>
+                                {% block page_name %}{% endblock %}
+                                <div class="header-actions">
+                                    {% block page_actions %}{% endblock %}
+                                </div>
+                                {% block no_description %}
+                                <small>{% block page_description %}{% endblock %}</small>
+                                {% endblock %}
+                            </h1>
+                            {% block breadcrumbs %}
+                                {% if breadcrumbs %}
+                                    <ol class="breadcrumb">
+                                        {% for crumb in breadcrumbs %}
+                                            {% if crumb.url %}
+                                                <li class="breadcrumb-item"><a href="{{ crumb.url }}">{{ crumb.name }}</a></li>
+                                            {% else %}
+                                                <li class="breadcrumb-item active">{{ crumb.name }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ol>
+                                {% endif %}
                             {% endblock %}
-                        </h1>
-                        {% block breadcrumbs %}
-                            {% if breadcrumbs %}
-                                <ol class="breadcrumb">
-                                    {% for crumb in breadcrumbs %}
-                                        {% if crumb.url %}
-                                            <li class="breadcrumb-item"><a href="{{ crumb.url }}">{{ crumb.name }}</a></li>
-                                        {% else %}
-                                            <li class="breadcrumb-item active">{{ crumb.name }}</li>
-                                        {% endif %}
-                                    {% endfor %}
-                                </ol>
-                            {% endif %}
-                        {% endblock %}
+                        </div>
                     {% endblock no_heading %}
                 </section>
             {% endblock %}
@@ -96,6 +98,29 @@
 {% endblock %}
 
 {% block extra_foot %}{% endblock %}
+
+<style>
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .breadcrumb {
+        background: none;
+        margin-bottom: 0;
+    }
+
+    .content-header h1 {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-actions {
+        margin-left: auto;
+    }
+</style>
 
 </body>
 </html>
