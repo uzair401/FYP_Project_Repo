@@ -1,0 +1,281 @@
+{% extends "adminlte/base.html" %}
+{% load static %}
+{% load custome_filters %}
+{% block content %}
+<!-- Message Container -->
+<div id="message-container" class="alert-container"></div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><strong>User Management</strong></h3>
+                <button class="btn btn-success float-right" data-bs-toggle="modal" data-bs-target="#addUserModal">Add User</button>
+            </div>
+            <div class="card-body table-responsive">
+                <table id="users-table" class="table table-striped table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Role</th>
+                            <th class="exclude">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{user.name}}
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.department.department_name }}</td>
+                            <td>{{ user.groups.all|join:", " }}</td>
+                            <td class="exclude">
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateUserModal{{ user.id }}">Update</button>
+                                <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.id }}">Delete</button>
+                            </td>
+                        </tr>
+
+                        <!-- Update User Modal -->
+                        <div class="modal fade" id="updateUserModal{{ user.id }}" tabindex="-1" aria-labelledby="updateUserModalLabel{{ user.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form id="updateUserForm{{ user.id }}" method="post" action="{% url 'core:user_update' user.id %}">
+                                        {% csrf_token %}
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="updateUserModalLabel{{ user.id }}">Update User</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {% comment %} {{ update_forms|get_item:user.id }} {% endcomment %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-primary">Save changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delete User Modal -->
+                        <div class="modal fade" id="deleteUserModal{{ user.id }}" tabindex="-1" aria-labelledby="deleteUserModalLabel{{ user.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form id="deleteUserForm{{ user.id }}" method="post" action="{% url 'core:user_delete' user.id %}">
+                                        {% csrf_token %}
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteUserModalLabel{{ user.id }}">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete {{ user.username }}?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addUserForm" method="post" action="{% url 'core:user_create' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form.as_p }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable with buttons
+        $('#users-table').DataTable({
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"Bf>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    className: 'btn btn-success float-right pdf-button',
+                    text: 'PDF',
+                    exportOptions: {
+                        columns: ':not(.exclude)'
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    className: 'btn btn-success excel-button',
+                    text: 'Excel',
+                    exportOptions: {
+                        columns: ':not(.exclude)'
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn btn-info float-right print-button',
+                    text: 'Print',
+                    exportOptions: {
+                        columns: ':not(.exclude)'
+                    }
+                }
+            ],
+            lengthMenu: [[25, 50, 100], [25, 50, 100]],
+            language: {
+                lengthMenu: "Show _MENU_ entries",
+                zeroRecords: "No records available",
+                info: "Showing page _PAGE_ of _PAGES_",
+                infoEmpty: "No records available",
+                infoFiltered: "(filtered from _MAX_ total records)",
+                search: "Search:",
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
+            }
+        });
+
+        // Check if there is a success message in localStorage
+        var successMessage = localStorage.getItem('successMessage');
+        if (successMessage) {
+            $('#message-container').html('<div class="alert alert-success">' + successMessage + '</div>');
+            localStorage.removeItem('successMessage');
+            setTimeout(function() {
+                $('#message-container').empty();
+            }, 2000);
+        }
+
+        // Handle form submission via AJAX for Add User
+        $('#addUserForm').submit(function(event) {
+            event.preventDefault();
+
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        $('#addUserModal').modal('hide');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        setTimeout(function() {
+                            $('#message-container').empty();
+                        }, 2000);
+                    }
+                },
+                error: function() {
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while adding the user.</div>');
+                    setTimeout(function() {
+                        $('#message-container').empty();
+                    }, 2000);
+                }
+            });
+        });
+
+        // Handle form submission via AJAX for Update User
+        $('form[id^="updateUserForm"]').submit(function(event) {
+            event.preventDefault();
+
+            var formId = $(this).attr('id');
+            var userId = formId.replace('updateUserForm', '');
+            var updateForm = $(this);
+
+            $.ajax({
+                type: 'POST',
+                url: updateForm.attr('action'),
+                data: updateForm.serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        $('#updateUserModal' + userId).modal('hide');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    }  else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        setTimeout(function() {
+                            $('#message-container').empty();
+                        }, 2000);
+                    }
+                },
+                error: function() {
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while updating the user.</div>');
+                    setTimeout(function() {
+                        $('#message-container').empty();
+                    }, 2000);
+                }
+            });
+        });
+
+        // Handle form submission via AJAX for Delete User
+        $('form[id^="deleteUserForm"]').submit(function(event) {
+            event.preventDefault();
+
+            var formId = $(this).attr('id');
+            var userId = formId.replace('deleteUserForm', '');
+            var deleteForm = $(this);
+
+            $.ajax({
+                type: 'POST',
+                url: deleteForm.attr('action'),
+                data: deleteForm.serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        $('#deleteUserModal' + userId).modal('hide');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        setTimeout(function() {
+                            $('#message-container').empty();
+                        }, 2000);
+                    }
+                },
+                error: function() {
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while deleting the user.</div>');
+                    setTimeout(function() {
+                        $('#message-container').empty();
+                    }, 2000);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
