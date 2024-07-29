@@ -2,12 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 from academics.models import Program, Batch, Semester, Course
 from students.models import Student
-
+from ERMS_System import settings
 class ExamRecord(models.Model):
     record_id = models.AutoField(primary_key=True)
     record_name = models.CharField(max_length=100)
     record_year = models.IntegerField()
-    examiner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='exam_records')
+    examiner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='exam_records')
     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='exam_records')
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='exam_records')
 

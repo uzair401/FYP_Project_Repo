@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import Student, Enrollment
 from academics.models import Program, Semester, Course, Batch
 from records.models import StudentExamRecord, StudentSemesterRecord
+from .forms import StudentForm
 
 class EnrollmentInline(admin.TabularInline):
     model = Enrollment
@@ -20,7 +21,12 @@ class StudentAdmin(admin.ModelAdmin):
     list_display = ( 'first_name', 'last_name', 'father_name', 'date_of_birth', 'registration_number', 'enrollment_year', 'status', 'department', 'program', 'batch')
     search_fields = ('first_name', 'last_name', 'registration_number')
     list_filter = ('department', 'program', 'status')
-    inlines = [EnrollmentInline, StudentExamRecordInline, StudentSemesterRecordInline]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.role == 'Faculty':
+            return qs.filter(department=request.user.department)
+        return qs
 
 @admin.register(Enrollment)
 class EnrollmentAdmin(admin.ModelAdmin):

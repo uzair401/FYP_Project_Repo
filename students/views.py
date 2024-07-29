@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from .models import Student, Department, Program, Batch
 from .forms import StudentForm
 from django.contrib.auth.decorators import login_required 
+from django.contrib.auth.models import Group
+
 
 @login_required
 def student(request):
