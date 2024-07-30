@@ -10,7 +10,9 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title"><strong> Semesters Section </strong></h3>
+                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
                 <button class="btn btn-success float-right" data-bs-toggle="modal" data-bs-target="#addSemesterModal">Add Semester</button>
+                {%endif%}
             </div>
             <div class="card-body table-responsive">
                 <table id="semesters-table" class="table table-striped table-bordered mt-3">
@@ -34,7 +36,9 @@
                             <td>{{ semester.program.department.department_name }}</td>
                             <td class="exclude">
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateSemesterModal{{ semester.semester_id }}">Update</button>
+                                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteSemesterModal{{ semester.semester_id }}">Delete</button>
+                            {%endif%}
                             </td>
                         </tr>
 
@@ -118,9 +122,10 @@
     $(document).ready(function() {
         // Initialize DataTable with buttons
         $('#semesters-table').DataTable({
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"Bf>>' +
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
                  '<"row"<"col-sm-12"tr>>' +
                  '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                 {% if request.user.role == 'Admin' %}
                  buttons: [
                  {
                      extend: 'pdfHtml5',
@@ -147,6 +152,7 @@
                      }
                  },
              ],
+             {% endif %}
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             language: {
                 lengthMenu: "Show _MENU_ entries",

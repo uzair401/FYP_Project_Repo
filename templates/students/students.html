@@ -45,7 +45,9 @@
                             <td>{{ student.batch.batch_name }}</td>
                             <td class = "exclude">
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateStudentModal{{ student.student_id }}">Update</button>
+                                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteStudentModal{{ student.student_id }}">Delete</button>
+                                {% endif%}
                             </td>
                         </tr>
 
