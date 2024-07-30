@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'academics.apps.AcademicsConfig',
     'students',
     'records',
-    'core',
+     'core.apps.CoreConfig',
 ]
 
 MIDDLEWARE = [

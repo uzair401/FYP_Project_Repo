@@ -29,3 +29,5 @@ class CustomUserChangeForm(UserChangeForm):
             'department': forms.Select(attrs={'class': 'form-control'}),
             'role': forms.Select(attrs={'class': 'form-control'}),
         }
+
+        

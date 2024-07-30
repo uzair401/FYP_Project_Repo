@@ -29,7 +29,7 @@
                         {% for user in users %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{user.name}}
+                            <td>{{ user.name }}</td>
                             <td>{{ user.username }}</td>
                             <td>{{ user.email }}</td>
                             <td>{{ user.department.department_name }}</td>
@@ -51,7 +51,7 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            {% comment %} {{ update_forms|get_item:user.id }} {% endcomment %}
+                                            {{ update_forms|get_item:user.id }}
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -115,40 +115,10 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
     $(document).ready(function() {
-        // Initialize DataTable with buttons
+        // Initialize DataTable
         $('#users-table').DataTable({
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"Bf>>' +
-                 '<"row"<"col-sm-12"tr>>' +
-                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-            buttons: [
-                {
-                    extend: 'pdfHtml5',
-                    className: 'btn btn-success float-right pdf-button',
-                    text: 'PDF',
-                    exportOptions: {
-                        columns: ':not(.exclude)'
-                    }
-                },
-                {
-                    extend: 'excelHtml5',
-                    className: 'btn btn-success excel-button',
-                    text: 'Excel',
-                    exportOptions: {
-                        columns: ':not(.exclude)'
-                    }
-                },
-                {
-                    extend: 'print',
-                    className: 'btn btn-info float-right print-button',
-                    text: 'Print',
-                    exportOptions: {
-                        columns: ':not(.exclude)'
-                    }
-                }
-            ],
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             language: {
                 lengthMenu: "Show _MENU_ entries",
@@ -166,43 +136,41 @@
             }
         });
 
-        // Check if there is a success message in localStorage
-        var successMessage = localStorage.getItem('successMessage');
-        if (successMessage) {
-            $('#message-container').html('<div class="alert alert-success">' + successMessage + '</div>');
-            localStorage.removeItem('successMessage');
+        // Handle success messages
+        function showMessage(type, message) {
+            $('#message-container').html('<div class="alert alert-' + type + '">' + message + '</div>');
             setTimeout(function() {
                 $('#message-container').empty();
             }, 2000);
         }
 
+        // Check if there is a success message in sessionStorage
+        var successMessage = sessionStorage.getItem('successMessage');
+        if (successMessage) {
+            showMessage('success', successMessage);
+            sessionStorage.removeItem('successMessage');
+        }
+
         // Handle form submission via AJAX for Add User
         $('#addUserForm').submit(function(event) {
             event.preventDefault();
-
             $.ajax({
                 type: 'POST',
                 url: $(this).attr('action'),
                 data: $(this).serialize(),
                 success: function(response) {
                     if (response.success) {
-                        localStorage.setItem('successMessage', response.message);
+                        sessionStorage.setItem('successMessage', response.message);
                         $('#addUserModal').modal('hide');
                         setTimeout(function() {
                             location.reload();
                         }, 500);
                     } else {
-                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
-                        setTimeout(function() {
-                            $('#message-container').empty();
-                        }, 2000);
+                        showMessage('danger', response.message);
                     }
                 },
                 error: function() {
-                    $('#message-container').html('<div class="alert alert-danger">An error occurred while adding the user.</div>');
-                    setTimeout(function() {
-                        $('#message-container').empty();
-                    }, 2000);
+                    showMessage('danger', 'An error occurred while adding the user.');
                 }
             });
         });
@@ -210,34 +178,25 @@
         // Handle form submission via AJAX for Update User
         $('form[id^="updateUserForm"]').submit(function(event) {
             event.preventDefault();
-
             var formId = $(this).attr('id');
             var userId = formId.replace('updateUserForm', '');
-            var updateForm = $(this);
-
             $.ajax({
                 type: 'POST',
-                url: updateForm.attr('action'),
-                data: updateForm.serialize(),
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
                 success: function(response) {
                     if (response.success) {
-                        localStorage.setItem('successMessage', response.message);
+                        sessionStorage.setItem('successMessage', response.message);
                         $('#updateUserModal' + userId).modal('hide');
                         setTimeout(function() {
                             location.reload();
                         }, 500);
-                    }  else {
-                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
-                        setTimeout(function() {
-                            $('#message-container').empty();
-                        }, 2000);
+                    } else {
+                        showMessage('danger', response.message);
                     }
                 },
                 error: function() {
-                    $('#message-container').html('<div class="alert alert-danger">An error occurred while updating the user.</div>');
-                    setTimeout(function() {
-                        $('#message-container').empty();
-                    }, 2000);
+                    showMessage('danger', 'An error occurred while updating the user.');
                 }
             });
         });
@@ -245,37 +204,33 @@
         // Handle form submission via AJAX for Delete User
         $('form[id^="deleteUserForm"]').submit(function(event) {
             event.preventDefault();
-
             var formId = $(this).attr('id');
             var userId = formId.replace('deleteUserForm', '');
-            var deleteForm = $(this);
-
             $.ajax({
                 type: 'POST',
-                url: deleteForm.attr('action'),
-                data: deleteForm.serialize(),
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
                 success: function(response) {
                     if (response.success) {
-                        localStorage.setItem('successMessage', response.message);
+                        sessionStorage.setItem('successMessage', response.message);
                         $('#deleteUserModal' + userId).modal('hide');
                         setTimeout(function() {
                             location.reload();
                         }, 500);
                     } else {
-                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
-                        setTimeout(function() {
-                            $('#message-container').empty();
-                        }, 2000);
+                        showMessage('danger', response.message);
                     }
                 },
                 error: function() {
-                    $('#message-container').html('<div class="alert alert-danger">An error occurred while deleting the user.</div>');
-                    setTimeout(function() {
-                        $('#message-container').empty();
-                    }, 2000);
+                    showMessage('danger', 'An error occurred while deleting the user.');
                 }
             });
         });
     });
 </script>
+
+
 {% endblock %}
+
+
+
