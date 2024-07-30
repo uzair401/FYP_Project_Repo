@@ -24,28 +24,37 @@ def assign_all_semesters(sender, instance, created, **kwargs):
                 enrollments.append(Enrollment(student=instance, semester=semester, course=course))
         Enrollment.objects.bulk_create(enrollments)
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import Group
+from .models import User
+
 @receiver(post_save, sender=User)
 def assign_user_group(sender, instance, created, **kwargs):
     if created:
         # Remove any existing groups to avoid duplications or conflicts
         instance.groups.clear()
 
-        # Assign groups and permissions based on user role
-        if instance.role == 'Admin':
-            admin_group = Group.objects.get(name='Admin')
-            instance.groups.add(admin_group)
-            instance.is_staff = True
-            instance.is_superuser = True
-        elif instance.role == 'Faculty':
-            faculty_group = Group.objects.get(name='Faculty')
-            instance.groups.add(faculty_group)
-            instance.is_staff = True
-            instance.is_superuser = False
-        elif instance.role == 'Editor':
-            editor_group = Group.objects.get(name='Editor')
-            instance.groups.add(editor_group)
-            instance.is_staff = False
-            instance.is_superuser = False
+        # Check and assign groups based on user role
+        try:
+            if instance.role == 'Admin':
+                admin_group = Group.objects.get(name='Admin')
+                instance.groups.add(admin_group)
+                instance.is_staff = True
+                instance.is_superuser = True
+            elif instance.role == 'Faculty':
+                faculty_group = Group.objects.get(name='Faculty')
+                instance.groups.add(faculty_group)
+                instance.is_staff = True
+                instance.is_superuser = False
+            elif instance.role == 'Editor':
+                editor_group = Group.objects.get(name='Editor')
+                instance.groups.add(editor_group)
+                instance.is_staff = False
+                instance.is_superuser = False
 
-        # Save the instance to apply changes
-        instance.save()
+            # Save the instance to apply changes
+            instance.save()
+        except Group.DoesNotExist:
+            # Handle the case where the group does not exist
+            print(f"Group for role {instance.role} does not exist.")

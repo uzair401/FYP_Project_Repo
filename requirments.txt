@@ -2,6 +2,7 @@ asgiref==3.8.1
 Django==5.0.6
 django-adminlte-3==0.1.6
 django-adminlte3==0.1.6
+django-filter==24.2
 django-nested-admin==4.0.2
 psycopg==3.2.1
 psycopg2==2.9.9

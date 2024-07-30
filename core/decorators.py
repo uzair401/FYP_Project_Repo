@@ -1,7 +1,10 @@
 from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
 from functools import wraps
-
+from django.shortcuts import get_object_or_404
+from academics.models import  Department, Program, Batch
+from core.models import User
+from students.models import Student
 def admin_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
@@ -57,6 +60,17 @@ def can_view(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         if request.user.role in ['Admin', 'Faculty', 'Editor']:
+            user_department_id = request.user.department.department_id if hasattr(request.user, 'department') else None
+            if request.user.role == 'Admin':
+                students = Student.objects.all()
+            elif request.user.role in ['Faculty', 'Editor']:
+                departments = Department.objects.filter(department_id=user_department_id)
+                programs = Program.objects.filter(department__in=departments)
+                batches = Batch.objects.filter(program__in=programs)
+                students = Student.objects.filter(batch__in=batches)
+            else:
+                students = Student.objects.none()
+            request.filtered_students = students
             return view_func(request, *args, **kwargs)
         else:
             return JsonResponse({'success': False, 'message': 'You do not have permission to view this resource.'}, status=403)

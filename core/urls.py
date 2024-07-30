@@ -1,11 +1,12 @@
 # core/urls.py
 from django.urls import path
 from . import views
+from academics.views import department
 
 app_name = 'core'
 
 urlpatterns = [
-    path('', views.dashboard, name='dashboard'),
+    path('', department, name='dashboard'),
     path('logout/', views.Logout, name="Logout"),
     path('users/', views.users, name='users_dashboard'),
     path('user/create/', views.user_create, name='user_create'),
