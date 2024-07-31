@@ -23,8 +23,15 @@ def student(request):
         students = Student.objects.none()
 
     # Create forms for adding and updating students
-    form = StudentForm()
-    update_forms = {student.student_id: StudentForm(instance=student) for student in students}
+    if request.user.role == 'Admin':
+        form = StudentForm()
+    elif request.user.role in ['Faculty', 'Editor']:
+        form = StudentForm(department_id=request.user.department.department_id)
+    update_forms = {
+    student.student_id: StudentForm(instance=student, department_id=request.user.department.department_id)
+    for student in students
+}
+
 
     # Context to pass to the template
     context = {

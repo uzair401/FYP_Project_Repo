@@ -74,9 +74,11 @@ def program(request):
         programs = Program.objects.filter(department_id=request.user.department.department_id)
     else:
         programs = Program.objects.none()
-
-    form = ProgramForm()
-    update_forms = {program.program_id: ProgramForm(instance=program) for program in programs}
+    if request.user.role == 'Admin':
+        form = ProgramForm()
+    elif request.user.role in ['Faculty', 'Editor']:
+        form = ProgramForm(department_id=request.user.department.department_id)
+    update_forms = {program.program_id: ProgramForm(instance=program, department_id=request.user.department.department_id) for program in programs}
 
     return render(request, 'academics/program.html', {
         'programs': programs,
@@ -138,9 +140,11 @@ def semester(request):
         semesters = Semester.objects.filter(program__in=programs)
     else:
         semesters = Semester.objects.none()
-
-    form = SemesterForm()
-    update_forms = {semester.semester_id: SemesterForm(instance=semester) for semester in semesters}
+    if request.user.role == 'Admin':
+        form = SemesterForm()
+    elif request.user.role in ['Faculty', 'Editor']:
+        form = SemesterForm(department_id=request.user.department.department_id)
+    update_forms = {semester.semester_id: SemesterForm(instance=semester, department_id=request.user.department.department_id) for semester in semesters}
 
     return render(request, 'academics/semester.html', {
         'semesters': semesters,
@@ -202,9 +206,11 @@ def course(request):
         courses = Course.objects.filter(semester__program__in=programs)
     else:
         courses = Course.objects.none()
-
-    form = CourseForm()
-    update_forms = {course.course_id: CourseForm(instance=course) for course in courses}
+    if request.user.role == 'Admin':
+        form = CourseForm()
+    elif request.user.role == ['Faculty', 'Editor']:
+        form = CourseForm(department_id=request.user.department.department_id)
+    update_forms = {course.course_id: CourseForm(instance=course,department_id=request.user.department.department_id) for course in courses}
 
     return render(request, 'academics/course.html', {
         'courses': courses,
@@ -266,9 +272,11 @@ def batch(request):
         batches = Batch.objects.filter(program__in=programs)
     else:
         batches = Batch.objects.none()
-
-    form = BatchForm()
-    update_forms = {batch.batch_id: BatchForm(instance=batch) for batch in batches}
+    if request.user.role == 'Admin':
+        form = BatchForm()
+    elif request.user.role in ['Faculty', 'Editor']:
+        form = BatchForm(department_id=request.user.department.department_id)
+    update_forms = {batch.batch_id: BatchForm(instance=batch,department_id=request.user.department.department_id) for batch in batches}
 
     return render(request, 'academics/programs_batches.html', {
         'batches': batches,
