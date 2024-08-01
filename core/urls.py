@@ -6,7 +6,7 @@ from academics.views import department
 app_name = 'core'
 
 urlpatterns = [
-    path('', department, name='dashboard'),
+    path('', views.dashboard, name='main_dashboard'),
     path('logout/', views.Logout, name="Logout"),
     path('users/', views.users, name='users_dashboard'),
     path('user/create/', views.user_create, name='user_create'),

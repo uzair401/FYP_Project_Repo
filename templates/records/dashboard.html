@@ -1,0 +1,138 @@
+{% extends "adminlte/base.html" %}
+{% load static %}
+{% load custome_filters %}
+{% block content %}
+<!-- Message Container -->
+<div id="message-container" class="alert-container"></div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><strong> Exam Records Section </strong></h3>
+                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
+                <button class="btn btn-success float-right" data-bs-toggle="modal" data-bs-target="#addExamRecordModal">Add Exam Record</button>
+                {% endif %}
+            </div>
+            <div class="card-body table-responsive">
+                <table id="exam-records-table" class="table table-striped table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th>Record Name</th>
+                            <th>Record Year</th>
+                            <th>Exam Date</th>
+                            <th>Session</th>
+                            <th>Examiner</th>
+                            <th>Program</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in exam_records %}
+                        <tr>
+                            <td>{{ record.record_name }} </td>
+                            <td>{{ record.record_year }}</td>
+                            <td>{{ record.exam_date }}</td>
+                            <td>{{ record.examiner }}</td>
+                            <td>{{record.session}}
+                            <td>{{ record.program.program_name }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Exam Record Modal -->
+<div class="modal fade" id="addExamRecordModal" tabindex="-1" aria-labelledby="addExamRecordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addExamRecordForm" method="post" action="{% url 'records:add_record' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addExamRecordModalLabel">Add Exam Record</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form.as_p }} <!-- Render the form fields -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable with search and pagination
+        $('#exam-records-table').DataTable({
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            language: {
+                lengthMenu: "Show _MENU_ entries",
+                zeroRecords: "No records available",
+                info: "Showing page _PAGE_ of _PAGES_",
+                infoEmpty: "No records available",
+                infoFiltered: "(filtered from _MAX_ total records)",
+                search: "Search:",
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
+            }
+        });
+
+        // Check if there is a success message in localStorage
+        var successMessage = localStorage.getItem('successMessage');
+        if (successMessage) {
+            $('#message-container').html('<div class="alert alert-success">' + successMessage + '</div>');
+            localStorage.removeItem('successMessage');
+            setTimeout(function() {
+                $('#message-container').empty();
+            }, 2000);
+        }
+
+        // Handle form submission via AJAX for Add Exam Record
+        $('#addExamRecordForm').submit(function(event) {
+            event.preventDefault();
+
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        $('#addExamRecordModal').modal('hide');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        setTimeout(function() {
+                            $('#message-container').empty();
+                        }, 2000);
+                    }
+                },
+                error: function() {
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while adding the exam record.</div>');
+                    setTimeout(function() {
+                        $('#message-container').empty();
+                    }, 2000);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

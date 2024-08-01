@@ -70,7 +70,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Batch)
 class BatchAdmin(admin.ModelAdmin):
-    list_display = ('batch_name', 'batch_number', 'batch_year', 'batch_session', 'program')
+    list_display = ('batch_name', 'batch_number', 'batch_year', 'batch_session_start','batch_session_end','batch_status', 'program')
     search_fields = ('batch_name', 'program__program_name', 'batch_number')
     list_filter = ('program',)
     

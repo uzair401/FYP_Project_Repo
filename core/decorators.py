@@ -1,35 +1,40 @@
-from django.http import JsonResponse
-from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.contrib import messages
 from functools import wraps
 from django.shortcuts import get_object_or_404
-from academics.models import  Department, Program, Batch
+from academics.models import Department, Program, Batch
 from core.models import User
 from students.models import Student
+
 def admin_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         if request.user.role == 'Admin':
             return view_func(request, *args, **kwargs)
         else:
-            return JsonResponse({'success': False, 'message': 'Admin access required.'}, status=403)
+            messages.error(request, 'Admin access required.')
+            return HttpResponseRedirect(reverse('core:main_dashboard'))  # Adjust 'core:dashboard' to your actual core:dashboard URL name
     return _wrapped_view
 
 def faculty_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        if request.user.role == 'Faculty':
+        # Check if the user is either Faculty or Admin
+        if request.user.role in ['Faculty', 'Admin']:
             return view_func(request, *args, **kwargs)
         else:
-            return JsonResponse({'success': False, 'message': 'Faculty access required.'}, status=403)
+            messages.error(request, 'Faculty or Admin access required.')
+            return HttpResponseRedirect(reverse('core:main_dashboard'))  # Adjust 'core:main_dashboard' to your actual main_dashboard URL name
     return _wrapped_view
-
 def editor_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         if request.user.role == 'Editor':
             return view_func(request, *args, **kwargs)
         else:
-            return JsonResponse({'success': False, 'message': 'Editor access required.'}, status=403)
+            messages.error(request, 'Editor access required.')
+            return HttpResponseRedirect(reverse('core:main_dashboard'))  # Adjust 'core:main_dashboard' to your actual core:main_dashboard URL name
     return _wrapped_view
 
 def can_add_update(view_func):
@@ -38,7 +43,8 @@ def can_add_update(view_func):
         if request.user.role in ['Admin', 'Faculty']:
             return view_func(request, *args, **kwargs)
         else:
-            return JsonResponse({'success': False, 'message': 'You do not have permission to add or update.'}, status=403)
+            messages.error(request, 'You do not have permission to add or update.')
+            return HttpResponseRedirect(reverse('core:main_dashboard'))  # Adjust 'core:main_dashboard' to your actual core:main_dashboard URL name
     return _wrapped_view
 
 def can_delete(view_func):
@@ -47,13 +53,14 @@ def can_delete(view_func):
         if request.user.role == 'Admin':
             return view_func(request, *args, **kwargs)
         elif request.user.role == 'Faculty':
-            # Allow Faculty to delete editors but not other faculty members or admins
             user_to_delete = get_object_or_404(User, pk=kwargs.get('user_id'))
-            if user_to_delete.role == 'Admin' or user_to_delete.role == 'Faculty':
-                return JsonResponse({'success': False, 'message': 'You do not have permission to delete this user.'}, status=403)
+            if user_to_delete.role in ['Admin', 'Faculty']:
+                messages.error(request, 'You do not have permission to delete this user.')
+                return HttpResponseRedirect(reverse('core:main_dashboard'))  # Adjust 'core:main_dashboard' to your actual core:main_dashboard URL name
             return view_func(request, *args, **kwargs)
         else:
-            return JsonResponse({'success': False, 'message': 'You do not have permission to delete.'}, status=403)
+            messages.error(request, 'You do not have permission to delete.')
+            return HttpResponseRedirect(reverse('core:main_dashboard'))  # Adjust 'core:main_dashboard' to your actual core:main_dashboard URL name
     return _wrapped_view
 
 def can_view(view_func):
@@ -73,7 +80,8 @@ def can_view(view_func):
             request.filtered_students = students
             return view_func(request, *args, **kwargs)
         else:
-            return JsonResponse({'success': False, 'message': 'You do not have permission to view this resource.'}, status=403)
+            messages.error(request, 'You do not have permission to view this resource.')
+            return HttpResponseRedirect(reverse('core:main_dashboard'))  # Adjust 'core:main_dashboard' to your actual core:main_dashboard URL name
     return _wrapped_view
 
 def can_update(view_func):
@@ -82,34 +90,16 @@ def can_update(view_func):
         if request.user.role in ['Admin', 'Faculty', 'Editor']:
             return view_func(request, *args, **kwargs)
         else:
-            return JsonResponse({'success': False, 'message': 'You do not have permission to update.'}, status=403)
+            messages.error(request, 'You do not have permission to update.')
+            return HttpResponseRedirect(reverse('core:core:main_dashboard'))  # Adjust 'core:core:main_dashboard' to your actual core:core:main_dashboard URL name
     return _wrapped_view
 
-# Example usage in your views:
-# @admin_required
-# def some_admin_view(request):
-#     ...
-
-# @faculty_required
-# def some_faculty_view(request):
-#     ...
-
-# @editor_required
-# def some_editor_view(request):
-#     ...
-
-# @can_add_update
-# def add_or_update_view(request):
-#     ...
-
-# @can_delete
-# def delete_view(request):
-#     ...
-
-# @can_view
-# def view_view(request):
-#     ...
-
-# @can_update
-# def update_view(request):
-#     ...
+def is_editor(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if request.user.role == 'Editor':
+            return view_func(request, *args, **kwargs)
+        else:
+            messages.error(request, 'You are not authorized to access this page.')
+            return HttpResponseRedirect(reverse('core:main_main_dashboard'))  # Adjust 'core:main_dashboar' to your actual dashboard URL name
+    return _wrapped_view

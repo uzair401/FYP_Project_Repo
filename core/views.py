@@ -6,16 +6,25 @@ from django.http import JsonResponse
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 from academics.models import Department
 from django.contrib.auth import logout
+from .decorators import faculty_required
 
 User = get_user_model()
 
+
+@faculty_required
 @login_required
 def users(request):
-    users = User.objects.all()
-    if request.user.role == 'Faculty':
-        users = users.filter(department=request.user.department)
-    form = CustomUserCreationForm()
-    update_forms = {user.id: CustomUserChangeForm(instance=user) for user in users}
+    if request.user.role == 'Admin':
+        users = User.objects.all()
+        form = CustomUserCreationForm()
+        update_forms = {user.id: CustomUserChangeForm(instance=user) for user in users}
+    elif request.user.role == 'Faculty':
+        users = User.objects.filter(department=request.user.department)
+        form = CustomUserCreationForm(department_id=request.user.department.department_id)
+        update_forms = {user.id: CustomUserChangeForm(instance=user, department_id=request.user.department.department_id) for user in users}
+    else:
+        users = User.objects.none()  # Handle other roles or users with no access
+    
     return render(request, 'core/users.html', {
         'users': users,
         'form': form,
@@ -23,6 +32,7 @@ def users(request):
     })
 
 @login_required
+@faculty_required
 def user_create(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -45,6 +55,7 @@ def user_create(request):
     return render(request, 'core/users.html', {'form': form})
 
 @login_required
+@faculty_required
 def user_update(request, user_id):
     user = get_object_or_404(User, id=user_id)
 
@@ -67,6 +78,7 @@ def user_update(request, user_id):
     return render(request, 'core/users.html', {'form': form, 'user': user})
 
 @login_required
+@faculty_required
 def user_delete(request, user_id):
     user = get_object_or_404(User, id=user_id)
     
@@ -90,8 +102,7 @@ def user_delete(request, user_id):
 
 @login_required
 def dashboard(request):
-    departments = Department.objects.all()
-    return render(request, 'core/dashboard.html', {'departments': departments})
+    return render(request, 'core/dashboard.html')
 
 @login_required
 def Logout(request):

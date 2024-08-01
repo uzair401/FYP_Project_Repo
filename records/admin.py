@@ -3,18 +3,55 @@ from .models import ExamRecord, StudentExamRecord, StudentSemesterRecord
 
 @admin.register(ExamRecord)
 class ExamRecordAdmin(admin.ModelAdmin):
-    list_display = ('record_id', 'record_name', 'record_year', 'examiner', 'program', 'batch')
+    list_display = ('record_id', 'record_name', 'record_year', 'examiner', 'program', 'exam_date', 'session')
     search_fields = ('record_name',)
-    list_filter = ('program', 'batch')
-
+    list_filter = ('program', )
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.role == 'Faculty':
+            return qs.filter(program__department=request.user.department)
+        return qs
 @admin.register(StudentExamRecord)
 class StudentExamRecordAdmin(admin.ModelAdmin):
-    list_display = ( 'internal_marks_obtained', 'mid_marks_obtained', 'final_marks_obtained', 'percentage_per_course', 'gpa_per_course', 'exam_record', 'program', 'semester', 'course', 'student')
+    list_display = (
+        'student_exam_rec_id',              
+        'internal_marks',
+        'mid_marks',
+        'final_marks',
+        'percentage_per_course',
+        'gpa_per_course',
+        'remarks',
+        'exam_record',                      
+        'program',                       
+        'semester',                      
+        'course',                        
+        'student'                        
+    )
     search_fields = ('student__first_name', 'student__last_name', 'course__course_name')
     list_filter = ('program', 'semester', 'course')
-
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.role == 'Faculty':
+            return qs.filter(program__department=request.user.department)
+        return qs
 @admin.register(StudentSemesterRecord)
 class StudentSemesterRecordAdmin(admin.ModelAdmin):
-    list_display = ( 'total_semester_marks', 'semester_obtained_marks', 'percentage', 'gpa_per_semester', 'cgpa', 'status', 'student_exam_rec', 'student')
+    list_display = (
+        'student_exam_rec',                
+        'total_semester_marks',
+        'semester_obtained_marks',
+        'percentage',
+        'gpa_per_semester',
+        'cgpa',
+        'remarks',
+        'student',                       
+        'semester',                     
+        'exam_record'                    
+    )
     search_fields = ('student__first_name', 'student__last_name')
-    list_filter = ('status',)
+    list_filter = ('remarks', 'semester', 'exam_record')
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.role == 'Faculty':
+            return qs.filter(semester__program__department=request.user.department)
+        return qs

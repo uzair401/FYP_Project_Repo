@@ -62,8 +62,8 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <!-- Form fields -->
-                                            {{ update_forms|get_item:student.student_id }}
+                                            <!-- Render the update form for each student -->
+                                            {{ update_forms|get_item:student.student_id|safe }}
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -73,6 +73,7 @@
                                 </div>
                             </div>
                         </div>
+
 
                         <!-- Delete Student Modal -->
                         <div class="modal fade" id="deleteStudentModal{{ student.student_id }}" tabindex="-1" aria-labelledby="deleteStudentModalLabel{{ student.student_id }}" aria-hidden="true">

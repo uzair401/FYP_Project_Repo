@@ -22,7 +22,8 @@
                             <th>Batch Name</th>
                             <th>Batch year</th>
                             <th>Batch Number</th>
-                            <th>Batch Session</th>
+                            <th>Start Session</th>
+                            <th>End Session</th>
                             <th>Program</th>
                             <th>Department</th>
                             <th class="exclude">Actions</th>
@@ -35,7 +36,8 @@
                             <td>{{ batch.batch_name }}</td>
                             <td>{{ batch.batch_year }}</td>
                             <td>{{ batch.batch_number }}</td>
-                            <td>{{ batch.batch_session }}</td>
+                            <td>{{ batch.batch_session_start }}</td>
+                            <td>{{ batch.batch_session_end }}</td>
                             <td>{{ batch.program.program_name }}</td>
                             <td>{{ batch.program.department.department_name }}</td>
                             <td class="exclude">

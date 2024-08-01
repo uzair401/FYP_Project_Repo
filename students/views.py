@@ -5,35 +5,25 @@ from django.contrib.auth.decorators import login_required
 from .models import Student
 from .forms import StudentForm
 from core.decorators import can_view, can_add_update, can_delete
-
+from core.decorators import faculty_required
 @login_required
-@can_view
 def student(request):
     # Retrieve the user role and department ID if available
-    user_role = request.user.role
     user_department_id = request.user.department.department_id if hasattr(request.user, 'department') else None
 
     # Filter students based on user role and department
-    if user_role == 'Admin':
-        students = Student.objects.all()
-    elif user_role in ['Faculty', 'Editor']:
-        # Filter students based on the department of the program
-        students = Student.objects.filter(department_id=user_department_id)
-    else:
-        students = Student.objects.none()
-
-    # Create forms for adding and updating students
     if request.user.role == 'Admin':
+        students = Student.objects.all()
         form = StudentForm()
     elif request.user.role in ['Faculty', 'Editor']:
+        students = Student.objects.filter(department_id=user_department_id)
         form = StudentForm(department_id=request.user.department.department_id)
+    else:
+        students = Student.objects.none()
     update_forms = {
     student.student_id: StudentForm(instance=student, department_id=request.user.department.department_id)
     for student in students
-}
-
-
-    # Context to pass to the template
+}   # Context to pass to the template
     context = {
         'students': students,
         'form': form,
@@ -77,6 +67,7 @@ def student_update(request, student_id):
 @csrf_exempt
 @login_required
 @can_delete
+@faculty_required
 def student_delete(request, student_id):
     student = get_object_or_404(Student, student_id=student_id)
 

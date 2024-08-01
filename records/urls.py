@@ -5,6 +5,7 @@ from . import views
 app_name = 'records'
 
 urlpatterns = [
-    path('', views.record_list, name='record_list'),
+    path('', views.exam_dashboard, name='Exam_dashboard'),
+    path('add_record/', views.add_record, name='add_record'),
     # path('<int:id>/', views.record_detail, name='record_detail'),
 ]

@@ -50,7 +50,9 @@ class Batch(models.Model):
     batch_name = models.CharField(max_length=100, unique=True)
     batch_year = models.IntegerField()
     batch_number = models.IntegerField()
-    batch_session = models.CharField(max_length=100)
+    batch_session_start = models.DateField()  # Set a default value here
+    batch_session_end = models.DateField()    # Set a default value here
+    batch_status = models.CharField(max_length=50, blank=True) 
     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='batches')
 
     def __str__(self):
