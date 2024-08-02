@@ -32,10 +32,12 @@ class ProgramForm(forms.ModelForm):
 class SemesterForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         department_id = kwargs.pop('department_id', None)
+        program_id = kwargs.pop('program_id', None)
         super().__init__(*args, **kwargs)
         if department_id:
             self.fields['program'].queryset = Program.objects.filter(department__department_id=department_id)
-
+        if program_id:
+            self.fields['program'].queryset = Program.objects.filter(program_id=program_id)
     class Meta:
         model = Semester
         fields = '__all__'

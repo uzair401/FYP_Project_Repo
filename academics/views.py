@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Department, Program, Semester, Course, Batch
 from .forms import DepartmentForm, ProgramForm, CourseForm, SemesterForm, BatchForm
 from django.contrib.auth.decorators import login_required
-from core.decorators import faculty_required
+from core.decorators import faculty_required, admin_required
 
 @login_required
 @faculty_required
@@ -28,6 +28,7 @@ def department(request):
 @csrf_exempt
 @login_required
 @faculty_required
+@admin_required
 def add_department(request):
     if request.method == 'POST':
         form = DepartmentForm(request.POST)
@@ -59,6 +60,7 @@ def department_update(request, department_id):
 @csrf_exempt
 @login_required
 @faculty_required
+@admin_required
 def department_delete(request, department_id):
     department = get_object_or_404(Department, department_id=department_id)
     
@@ -144,6 +146,25 @@ def semester(request):
         departments = Department.objects.filter(department_id=request.user.department.department_id)
         programs = Program.objects.filter(department__in=departments)
         semesters = Semester.objects.filter(program__in=programs)
+        form = SemesterForm(department_id=request.user.department.department_id)
+    else:
+        semesters = Semester.objects.none()
+    update_forms = {semester.semester_id: SemesterForm(instance=semester, department_id=request.user.department.department_id) for semester in semesters}
+
+    return render(request, 'academics/semester.html', {
+        'semesters': semesters,
+        'form': form,
+        'update_forms': update_forms,
+    })
+@login_required
+def semester_filtered(request, program_id):
+    if request.user.role == 'Admin':
+        semesters = Semester.objects.filter(program_id=program_id)
+        form = SemesterForm(program_id=program_id)
+    elif request.user.role in ['Faculty', 'Editor']:
+        departments = Department.objects.filter(department_id=request.user.department.department_id)
+        programs = Program.objects.filter(department__in=departments)
+        semesters = Semester.objects.filter(program_id=program_id, program__in=programs)
         form = SemesterForm(department_id=request.user.department.department_id)
     else:
         semesters = Semester.objects.none()

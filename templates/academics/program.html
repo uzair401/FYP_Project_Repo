@@ -31,7 +31,7 @@
                         <tr>
                             <td>{{ program.program_name }}</td>
                             <td>{{ program.program_code }}</td>
-                            <td>{{ program.number_of_semesters }}</td>
+                            <td><a href="{% url 'academics:semester_filtered' program_id=program.program_id %}">{{ program.number_of_semesters }}</td>
                             <td>{{ program.department.department_name }}</td>
                             <td>{{ program.program_description }}</td>
                             <td class = "exclude">
@@ -75,7 +75,8 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            Are you sure you want to delete {{ program.program_name }}?
+                                            <strong >Are you sure you want to delete {{ program.program_name }}?<br>
+                                            All related data, Batches, Courses, & Students will be deleted. </strong>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
