@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'academics.apps.AcademicsConfig',
-    'students',
+    'students.apps.StudentsConfig',
     'records',
      'core.apps.CoreConfig',
 ]
@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'ERMS_System.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'project_database',
+        'NAME': 'main_project_db',
         'USER': 'postgres',
         'PASSWORD': '@Uzair401',
         'HOST': 'localhost',  

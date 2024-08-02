@@ -39,5 +39,10 @@ class Enrollment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ('student', 'course', 'semester')
+        verbose_name = "Enrollment"
+        verbose_name_plural = "Enrollments"
+
     def __str__(self):
-        return f"Enrollment {self.enrollment_id}"
+        return f"{self.student} enrolled in {self.course} for {self.semester}"
