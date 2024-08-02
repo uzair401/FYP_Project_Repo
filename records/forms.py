@@ -1,3 +1,4 @@
+
 from django import forms
 from .models import ExamRecord, StudentExamRecord, StudentSemesterRecord
 from academics.models import Program, Course, Semester
@@ -18,17 +19,17 @@ class ExamRecordForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        department_id = kwargs.pop('department_id', None)  # Retrieve the department_id if provided
-        user = kwargs.pop('user', None)  # Retrieve the user object
+        department_id = kwargs.pop('department_id', None)  # Remove department_id from kwargs
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
         if user:
             if user.role == 'Admin':
+                self.fields['examiner'].queryset = User.objects.all()
                 self.fields['program'].queryset = Program.objects.all()
-            elif user.role in ['Faculty', 'Editor']:
-                self.fields['program'].queryset = Program.objects.filter(department_id=department_id)
-            else:
-                self.fields['program'].queryset = Program.objects.none()
+            elif user.role == 'Faculty':
+                self.fields['examiner'].queryset = User.objects.filter(department=user.department)
+                self.fields['program'].queryset = Program.objects.filter(department=user.department)
 class StudentExamRecordForm(forms.ModelForm):
     class Meta:
         model = StudentExamRecord
@@ -48,32 +49,22 @@ class StudentExamRecordForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Retrieve the user object
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
         if user:
-            department_id = getattr(user.department, 'id', None)
             if user.role == 'Admin':
                 self.fields['program'].queryset = Program.objects.all()
                 self.fields['semester'].queryset = Semester.objects.all()
                 self.fields['course'].queryset = Course.objects.all()
                 self.fields['student'].queryset = Student.objects.all()
-            elif user.role in ['Faculty', 'Editor']:
-                self.fields['program'].queryset = Program.objects.filter(department_id=department_id)
+            elif user.role == 'Faculty':
+                self.fields['program'].queryset = Program.objects.filter(department=user.department)
                 program_id = self.initial.get('program') or self.data.get('program')
                 if program_id:
                     self.fields['semester'].queryset = Semester.objects.filter(program_id=program_id)
                     self.fields['course'].queryset = Course.objects.filter(program_id=program_id)
-                    self.fields['student'].queryset = Student.objects.filter(department_id=department_id)
-                else:
-                    self.fields['semester'].queryset = Semester.objects.none()
-                    self.fields['course'].queryset = Course.objects.none()
-                    self.fields['student'].queryset = Student.objects.none()
-            else:
-                self.fields['program'].queryset = Program.objects.none()
-                self.fields['semester'].queryset = Semester.objects.none()
-                self.fields['course'].queryset = Course.objects.none()
-                self.fields['student'].queryset = Student.objects.none()
+                    self.fields['student'].queryset = Student.objects.filter(department=user.department)
 
 class StudentSemesterRecordForm(forms.ModelForm):
     class Meta:
@@ -92,21 +83,17 @@ class StudentSemesterRecordForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Retrieve the user object
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
         if user:
-            department_id = getattr(user.department, 'id', None)
             if user.role == 'Admin':
                 self.fields['student'].queryset = Student.objects.all()
                 self.fields['semester'].queryset = Semester.objects.all()
-            elif user.role in ['Faculty', 'Editor']:
-                self.fields['student'].queryset = Student.objects.filter(department_id=department_id)
+                self.fields['exam_record'].queryset = ExamRecord.objects.all()
+            elif user.role == 'Faculty':
+                self.fields['student'].queryset = Student.objects.filter(department=user.department)
                 program_id = self.initial.get('program') or self.data.get('program')
                 if program_id:
                     self.fields['semester'].queryset = Semester.objects.filter(program_id=program_id)
-                else:
-                    self.fields['semester'].queryset = Semester.objects.none()
-            else:
-                self.fields['student'].queryset = Student.objects.none()
-                self.fields['semester'].queryset = Semester.objects.none()
+                    self.fields['exam_record'].queryset = ExamRecord.objects.filter(program_id=program_id)
