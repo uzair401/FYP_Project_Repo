@@ -1,7 +1,7 @@
 
 from django import forms
-from .models import ExamRecord, StudentExamRecord, StudentSemesterRecord
-from academics.models import Program, Course, Semester
+from .models import ExamRecord, StudentExamRecord, StudentSemesterRecord, ExamEnrollment
+from academics.models import Program, Course, Semester ,Batch
 from students.models import Student
 from core.models import User
 
@@ -97,3 +97,29 @@ class StudentSemesterRecordForm(forms.ModelForm):
                 if program_id:
                     self.fields['semester'].queryset = Semester.objects.filter(program_id=program_id)
                     self.fields['exam_record'].queryset = ExamRecord.objects.filter(program_id=program_id)
+
+class ExamEnrollmentForm(forms.ModelForm):
+    class Meta:
+        model = ExamEnrollment
+        fields = ['exam_record', 'batch', 'semester']
+        widgets = {
+            'exam_record': forms.Select(attrs={'class': 'form-control'}),
+            'batch': forms.Select(attrs={'class': 'form-control'}),
+            'semester': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        if user:
+            if user.role == 'Admin':
+                self.fields['exam_record'].queryset = ExamRecord.objects.all()
+                self.fields['batch'].queryset = Batch.objects.all()
+                self.fields['semester'].queryset = Semester.objects.all()
+            elif user.role == 'Faculty':
+                self.fields['exam_record'].queryset = ExamRecord.objects.filter(program__in=user.department.programs.all())
+                self.fields['batch'].queryset = Batch.objects.filter(program__in=user.department.programs.all())
+                program_id = self.initial.get('program') or self.data.get('program')
+                if program_id:
+                    self.fields['semester'].queryset = Semester.objects.filter(program_id=program_id)

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ExamRecord, StudentExamRecord, StudentSemesterRecord
+from .models import ExamRecord, StudentExamRecord, StudentSemesterRecord, ExamEnrollment
 
 @admin.register(ExamRecord)
 class ExamRecordAdmin(admin.ModelAdmin):
@@ -54,4 +54,16 @@ class StudentSemesterRecordAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.role == 'Faculty':
             return qs.filter(semester__program__department=request.user.department)
+        return qs
+    
+@admin.register(ExamEnrollment)
+class ExamEnrollmentAdmin(admin.ModelAdmin):
+    list_display = ('exam_record', 'batch', 'semester')
+    search_fields = ('exam_record__record_name', 'batch__batch_id', 'semester__semester_number')
+    list_filter = ('exam_record', 'batch', 'semester')
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.role == 'Faculty':
+            return qs.filter(exam_record__program__department=request.user.department)
         return qs

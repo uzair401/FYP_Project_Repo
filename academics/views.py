@@ -321,12 +321,9 @@ def add_batch(request):
 
 @csrf_exempt
 @login_required
+@faculty_required
 def batch_update(request, batch_id):
     batch = get_object_or_404(Batch, batch_id=batch_id)
-    
-    if request.user.role != 'Admin':
-        return JsonResponse({'success': False, 'message': 'You do not have permission to update batches.'})
-
     if request.method == 'POST':
         form = BatchForm(request.POST, instance=batch)
         if form.is_valid():

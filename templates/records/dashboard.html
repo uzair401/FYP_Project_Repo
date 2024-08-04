@@ -29,7 +29,7 @@
                     <tbody>
                         {% for record in exam_records %}
                         <tr>
-                            <td>{{ record.record_name }} </td>
+                            <td><a href="{% url 'records:batches' exam_record_id=record.record_id %}">{{ record.record_name }} </td>
                             <td>{{ record.record_year }}</td>
                             <td>{{ record.exam_date }}</td>
                             <td>{{ record.examiner }}</td>

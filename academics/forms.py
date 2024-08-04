@@ -100,5 +100,5 @@ class BatchForm(forms.ModelForm):
                 }
             ),
             'program': forms.Select(attrs={'class': 'form-control'}),
-            'batch_status': forms.TextInput(attrs={'class': 'form-control'}),
+            'batch_status': forms.Select(attrs={'class': 'form-control'}),
         }

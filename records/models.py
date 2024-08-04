@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from core.models import User
+from academics.models import Batch, Semester
 # Custom validation for GPA and percentages
 def validate_percentage(value):
     if not (0 <= value <= 100):
@@ -59,3 +60,15 @@ class StudentSemesterRecord(models.Model):
 
     class Meta:
         unique_together = ('student', 'semester', 'exam_record')  # Unique per student, semester, and exam record
+
+class ExamEnrollment(models.Model):
+    exam_record = models.ForeignKey(ExamRecord, on_delete=models.CASCADE)
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+    semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
+    # Add other fields if necessary
+    
+    class Meta:
+        unique_together = ('exam_record', 'batch', 'semester')  # Ensure this matches your requirements
+
+    def __str__(self):
+        return f"{self.exam_record} - {self.batch} - {self.semester}"
