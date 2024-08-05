@@ -3,7 +3,7 @@ from .models import ExamRecord, StudentExamRecord, StudentSemesterRecord, ExamEn
 
 @admin.register(ExamRecord)
 class ExamRecordAdmin(admin.ModelAdmin):
-    list_display = ('record_id', 'record_name', 'record_year', 'examiner', 'program', 'exam_date', 'session')
+    list_display = ('record_name', 'record_year', 'examiner', 'program', 'exam_date', 'session')
     search_fields = ('record_name',)
     list_filter = ('program', )
     def get_queryset(self, request):
@@ -13,19 +13,18 @@ class ExamRecordAdmin(admin.ModelAdmin):
         return qs
 @admin.register(StudentExamRecord)
 class StudentExamRecordAdmin(admin.ModelAdmin):
-    list_display = (
-        'student_exam_rec_id',              
+    list_display = (                      
+        'student',  
+        'course',                        
+        'program',                       
+        'semester',        
         'internal_marks',
         'mid_marks',
         'final_marks',
         'percentage_per_course',
         'gpa_per_course',
         'remarks',
-        'exam_record',                      
-        'program',                       
-        'semester',                      
-        'course',                        
-        'student'                        
+        'exam_record',                                              
     )
     search_fields = ('student__first_name', 'student__last_name', 'course__course_name')
     list_filter = ('program', 'semester', 'course')

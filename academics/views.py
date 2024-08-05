@@ -255,11 +255,12 @@ def add_course(request):
 
 @csrf_exempt
 @login_required
+@faculty_required
 def course_update(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     
-    if request.user.role != 'Admin':
-        return JsonResponse({'success': False, 'message': 'You do not have permission to update courses.'})
+    # if request.user.role != 'Admin':
+    #     return JsonResponse({'success': False, 'message': 'You do not have permission to update courses.'})
 
     if request.method == 'POST':
         form = CourseForm(request.POST, instance=course)

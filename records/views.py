@@ -3,9 +3,10 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from core.decorators import faculty_required
 from .models import ExamRecord, ExamEnrollment
-
+from academics.models import Course, Semester
 from .forms import ExamRecordForm, ExamEnrollmentForm
-
+from .models import StudentExamRecord, StudentSemesterRecord
+from students.models import Enrollment
 @login_required
 @faculty_required
 def exam_dashboard(request):
@@ -78,3 +79,50 @@ def update_batch(request, id):
             return JsonResponse({'success': False, 'message': 'Failed to update batch. Errors: ' + str(form.errors)})
     else:
         return JsonResponse({'success': False, 'message': 'Invalid request method'})
+@login_required
+@faculty_required
+def semesters(request, batch_id, exam_record_id):
+    semesters = ExamEnrollment.objects.filter(batch_id=batch_id, exam_record_id=exam_record_id)
+    
+    return render(request, 'records/semesters.html', {
+        'semesters': semesters,
+    })
+@login_required
+@faculty_required
+def courses(request, semester_id):
+    exam_enrollment = get_object_or_404(ExamEnrollment, semester__semester_id=semester_id)
+    courses = Course.objects.filter(semester=exam_enrollment.semester)
+
+    return render(request, 'records/courses.html', {
+        'courses': courses,
+        'semester': exam_enrollment.semester,
+    })
+
+@login_required
+def course_student_records(request, course_id, semester_id):
+    # Retrieve the selected course
+    course = get_object_or_404(Course, course_id=course_id)
+    
+    # Retrieve enrollments for the selected course and semester
+    enrollments = Enrollment.objects.filter(course_id=course_id, semester_id=semester_id)
+    
+    # Retrieve student exam records and semester records
+    student_exam_records = StudentExamRecord.objects.filter(course_id=course_id, semester_id=semester_id)
+    student_semester_records = StudentSemesterRecord.objects.filter(semester_id=semester_id)
+    
+    # Prepare data dictionary for template
+    student_data = {}
+    for enrollment in enrollments:
+        student = enrollment.student
+        student_data[student.student_id] = {
+            'student': student,
+            'exam_record': student_exam_records.filter(student=student).first(),
+            'semester_record': student_semester_records.filter(student=student).first(),
+        }
+    
+    context = {
+        'course': course,
+        'student_data': student_data,
+    }
+    
+    return render(request, 'records/records.html', context)
