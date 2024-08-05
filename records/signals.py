@@ -107,6 +107,7 @@ def create_student_exam_records(sender, instance, created, **kwargs):
                                 'internal_marks': 0,
                                 'mid_marks': 0,
                                 'final_marks': 0,
+                                'total_marks': 0,
                                 'percentage_per_course': 0,
                                 'gpa_per_course': 0,
                                 'remarks': ''

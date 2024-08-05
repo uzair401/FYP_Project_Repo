@@ -17,72 +17,47 @@
                     <thead>
                         <tr>
                             <th>Student Name</th>
-                            <th>Internal Marks</th>
-                            <th>Mid Marks</th>
-                            <th>Final Marks</th>
+                            <th>Father Name</th>
+                            <th>Registration Number</th>
+                            <th>Course Name</th>
+                            <th>Internal Obtained</th>
+                            <th>Internal Total</th>
+                            <th>Mid Obtained</th>
+                            <th>Mid Total</th>
+                            <th>Final Obtained</th>
+                            <th>Final Total</th>
+                            <th>Obtained Marks</th>
+                            <th>Total Marks</th>
                             <th>Percentage</th>
                             <th>GPA</th>
-                            <th>Semester GPA</th>
-                            <th>CGPA</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for student_id, data in student_data.items %}
                         <tr>
-                            <td>{{ data.student.get_first_name }}</td>
-                            <td>
-                                {% if data.exam_record %}
-                                    {{ data.exam_record.internal_marks|default:"Not Available" }}
-                                {% else %}
-                                    Not Available
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if data.exam_record %}
-                                    {{ data.exam_record.mid_marks|default:"Not Available" }}
-                                {% else %}
-                                    Not Available
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if data.exam_record %}
-                                    {{ data.exam_record.final_marks|default:"Not Available" }}
-                                {% else %}
-                                    Not Available
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if data.exam_record %}
-                                    {{ data.exam_record.percentage_per_course|default:"Not Available" }}
-                                {% else %}
-                                    Not Available
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if data.exam_record %}
-                                    {{ data.exam_record.gpa_per_course|default:"Not Available" }}
-                                {% else %}
-                                    Not Available
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if data.semester_record %}
-                                    {{ data.semester_record.gpa_per_semester|default:"Not Available" }}
-                                {% else %}
-                                    Not Available
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if data.semester_record %}
-                                    {{ data.semester_record.cgpa|default:"Not Available" }}
-                                {% else %}
-                                    Not Available
-                                {% endif %}
+                            <td>{{ data.student.first_name }} {{ data.student.last_name }}</td>
+                            <td>{{ data.student.father_name }}</td>
+                            <td>{{ data.student.registration_number }}</td>
+                            <td>{{ data.course.course_name }}</td>
+                            <td><input type="text" class="form-control" value="{{ data.exam_record.internal_marks }}" name="internal_marks" /></td>
+                            <td>{{ data.course.internal_marks }}</td>
+                            <td><input type="text" class="form-control" value="{{ data.exam_record.mid_marks }}" name="mid_marks" /></td>
+                            <td>{{ data.course.mid_marks }}</td>
+                            <td><input type="text" class="form-control" value="{{ data.exam_record.final_marks }}" name="final_marks" /></td>
+                            <td>{{ data.course.final_marks }}</td>
+                            <td>{{ data.exam_record.total_marks }}</td>
+                            <td>{{ data.course.total_marks }}</td>
+                            <td>{{ data.exam_record.percentage_per_course }}</td>
+                            <td>{{ data.exam_record.gpa_per_course }}</td>
+                            <td class="exclude">
+                                <button class="btn btn-primary btn-sm update-btn">Update</button>
+                                <button class="btn btn-danger btn-sm reset-btn">Reset</button>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="8">No records available</td>
+                            <td colspan="15">No records available</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -126,6 +101,55 @@
                 $('#message-container').empty();
             }, 2000);
         }
+
+        // Update button click event
+        $('.update-btn').click(function() {
+            var row = $(this).closest('tr');
+            var studentId = row.find('input[name="student_id"]').val();
+            var internalMarks = row.find('input[name="internal_marks"]').val();
+            var midMarks = row.find('input[name="mid_marks"]').val();
+            var finalMarks = row.find('input[name="final_marks"]').val();
+
+            // Perform AJAX request to update the data
+            $.ajax({
+                type: 'POST',
+                {% comment %} url: '{% url "update_student_record" %}',  // Change this to your actual update URL {% endcomment %}
+                data: {
+                    student_id: studentId,
+                    internal_marks: internalMarks,
+                    mid_marks: midMarks,
+                    final_marks: finalMarks,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                        setTimeout(function() {
+                            $('#message-container').empty();
+                        }, 2000);
+                    }
+                },
+                error: function() {
+                    $('#message-container').html('<div class="alert alert-danger">An error occurred while updating the record.</div>');
+                    setTimeout(function() {
+                        $('#message-container').empty();
+                    }, 2000);
+                }
+            });
+        });
+
+        // Reset button click event
+        $('.reset-btn').click(function() {
+            var row = $(this).closest('tr');
+            row.find('input[name="internal_marks"]').val(0);
+            row.find('input[name="mid_marks"]').val(0);
+            row.find('input[name="final_marks"]').val(0);
+        });
     });
 </script>
 {% endblock %}

@@ -21,6 +21,7 @@ class StudentExamRecordAdmin(admin.ModelAdmin):
         'internal_marks',
         'mid_marks',
         'final_marks',
+        'total_marks',
         'percentage_per_course',
         'gpa_per_course',
         'remarks',

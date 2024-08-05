@@ -34,6 +34,7 @@ class StudentExamRecord(models.Model):
     internal_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage])
     mid_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage] )
     final_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage] )
+    total_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage] )
     percentage_per_course = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage] )
     gpa_per_course = models.DecimalField(max_digits=3, decimal_places=2, validators=[validate_gpa] )
     remarks = models.CharField(max_length=50)

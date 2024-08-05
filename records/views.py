@@ -103,20 +103,18 @@ def course_student_records(request, course_id, semester_id):
     # Retrieve the selected course
     course = get_object_or_404(Course, course_id=course_id)
     
-    # Retrieve enrollments for the selected course and semester
-    enrollments = Enrollment.objects.filter(course_id=course_id, semester_id=semester_id)
-    
-    # Retrieve student exam records and semester records
+    # Retrieve student exam records and semester records for the specified course and semester
     student_exam_records = StudentExamRecord.objects.filter(course_id=course_id, semester_id=semester_id)
     student_semester_records = StudentSemesterRecord.objects.filter(semester_id=semester_id)
     
     # Prepare data dictionary for template
     student_data = {}
-    for enrollment in enrollments:
-        student = enrollment.student
+    for exam_record in student_exam_records:
+        student = exam_record.student
         student_data[student.student_id] = {
             'student': student,
-            'exam_record': student_exam_records.filter(student=student).first(),
+            'course': course,  # Include course in the student data
+            'exam_record': exam_record,
             'semester_record': student_semester_records.filter(student=student).first(),
         }
     
