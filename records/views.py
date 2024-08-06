@@ -7,6 +7,7 @@ from academics.models import Course, Semester
 from .forms import ExamRecordForm, ExamEnrollmentForm
 from .models import StudentExamRecord, StudentSemesterRecord
 from students.models import Enrollment
+from .helpers import validate_marks
 @login_required
 @faculty_required
 def exam_dashboard(request):
@@ -124,3 +125,50 @@ def course_student_records(request, course_id, semester_id):
     }
     
     return render(request, 'records/records.html', context)
+@login_required
+def update_student_record(request):
+    if request.method == 'POST':
+        student_id = request.POST.get('student_id')
+        internal_marks = float(request.POST.get('internal_marks'))
+        mid_marks = float(request.POST.get('mid_marks'))
+        final_marks = float(request.POST.get('final_marks'))
+        course_id = request.POST.get('course_id')
+        semester_id = request.POST.get('semester_id')
+
+        exam_record = get_object_or_404(StudentExamRecord, student_id=student_id, course_id=course_id, semester_id=semester_id)
+        course = get_object_or_404(Course, course_id=course_id)
+
+        # Validate marks before updating
+        if validate_marks(internal_marks, mid_marks, final_marks, course.internal_marks, course.mid_marks, course.final_marks, course.total_marks):
+            print("function returned true")
+            exam_record.internal_marks = internal_marks
+            exam_record.mid_marks = mid_marks
+            exam_record.final_marks = final_marks
+            exam_record.total_marks = internal_marks + mid_marks + final_marks
+            exam_record.save()
+
+            return JsonResponse({'success': True, 'message': 'Record updated successfully!'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Entered marks are greater than course marks!'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=400)
+
+@login_required
+def reset_student_record(request):
+    if request.method == 'POST':
+        student_id = request.POST.get('student_id')
+        course_id = request.POST.get('course_id')
+        semester_id = request.POST.get('semester_id')
+
+        exam_record = get_object_or_404(StudentExamRecord, student_id=student_id, course_id=course_id, semester_id=semester_id)
+
+        # Reset marks to 0
+        exam_record.internal_marks = 0
+        exam_record.mid_marks = 0
+        exam_record.final_marks = 0
+        exam_record.total_marks = 0
+        exam_record.percentage_per_course = 0
+        exam_record.save()
+
+        return JsonResponse({'success': True, 'message': 'Record reset successfully!'})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})

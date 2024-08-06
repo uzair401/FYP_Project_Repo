@@ -28,7 +28,7 @@
                             <th>Final Total</th>
                             <th>Obtained Marks</th>
                             <th>Total Marks</th>
-                            <th>Percentage</th>
+                            <th>Grade</th>
                             <th>GPA</th>
                             <th>Actions</th>
                         </tr>
@@ -48,11 +48,11 @@
                             <td>{{ data.course.final_marks }}</td>
                             <td>{{ data.exam_record.total_marks }}</td>
                             <td>{{ data.course.total_marks }}</td>
-                            <td>{{ data.exam_record.percentage_per_course }}</td>
+                            <td>{{ data.exam_record.grade }}</td>
                             <td>{{ data.exam_record.gpa_per_course }}</td>
                             <td class="exclude">
-                                <button class="btn btn-primary btn-sm update-btn">Update</button>
-                                <button class="btn btn-danger btn-sm reset-btn">Reset</button>
+                                <button class="btn btn-primary btn-sm update-btn" data-student-id="{{ data.student.student_id }}" data-course-id="{{ data.course.course_id }}" data-semester-id="{{ data.semester_record.semester.semester_id }}">Update</button>
+                                <button class="btn btn-danger btn-sm reset-btn" data-student-id="{{ data.student.student_id }}" data-course-id="{{ data.course.course_id }}" data-semester-id="{{ data.semester_record.semester.semester_id }}">Reset</button>
                             </td>
                         </tr>
                         {% empty %}
@@ -105,20 +105,24 @@
         // Update button click event
         $('.update-btn').click(function() {
             var row = $(this).closest('tr');
-            var studentId = row.find('input[name="student_id"]').val();
+            var studentId = $(this).data('student-id');
             var internalMarks = row.find('input[name="internal_marks"]').val();
             var midMarks = row.find('input[name="mid_marks"]').val();
             var finalMarks = row.find('input[name="final_marks"]').val();
+            var courseId = $(this).data('course-id');
+            var semesterId = $(this).data('semester-id');
 
             // Perform AJAX request to update the data
             $.ajax({
                 type: 'POST',
-                {% comment %} url: '{% url "update_student_record" %}',  // Change this to your actual update URL {% endcomment %}
+                url: '{% url "records:update_student_record" %}',
                 data: {
                     student_id: studentId,
                     internal_marks: internalMarks,
                     mid_marks: midMarks,
                     final_marks: finalMarks,
+                    course_id: courseId,
+                    semester_id: semesterId,
                     csrfmiddlewaretoken: '{{ csrf_token }}'
                 },
                 success: function(response) {
@@ -129,27 +133,40 @@
                         }, 500);
                     } else {
                         $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
-                        setTimeout(function() {
-                            $('#message-container').empty();
-                        }, 2000);
                     }
-                },
-                error: function() {
-                    $('#message-container').html('<div class="alert alert-danger">An error occurred while updating the record.</div>');
-                    setTimeout(function() {
-                        $('#message-container').empty();
-                    }, 2000);
                 }
             });
         });
 
         // Reset button click event
         $('.reset-btn').click(function() {
-            var row = $(this).closest('tr');
-            row.find('input[name="internal_marks"]').val(0);
-            row.find('input[name="mid_marks"]').val(0);
-            row.find('input[name="final_marks"]').val(0);
+            var studentId = $(this).data('student-id');
+            var courseId = $(this).data('course-id');
+            var semesterId = $(this).data('semester-id');
+
+            // Perform AJAX request to reset the data
+            $.ajax({
+                type: 'POST',
+                url: '{% url "records:reset_student_record" %}',
+                data: {
+                    student_id: studentId,
+                    course_id: courseId,
+                    semester_id: semesterId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                    }
+                }
+            });
         });
     });
 </script>
+
 {% endblock %}

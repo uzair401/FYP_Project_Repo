@@ -11,6 +11,8 @@ urlpatterns = [
     path('semesters/<int:batch_id>/<int:exam_record_id>/', views.semesters, name='semesters'),  
     path('courses/<int:semester_id>/', views.courses, name='courses'),
     path('course/<int:course_id>/semester/<int:semester_id>/records/', views.course_student_records, name='course_student_records'),
+    path('update_student_record/', views.update_student_record, name='update_student_record'),
+    path('reset_student_record/', views.reset_student_record, name='reset_student_record'),
     # path('<int:id>/', views.record_detail, name='record_detail'),
 
 ]

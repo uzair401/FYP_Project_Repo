@@ -33,12 +33,11 @@ class ExamRecordForm(forms.ModelForm):
 class StudentExamRecordForm(forms.ModelForm):
     class Meta:
         model = StudentExamRecord
-        fields = ['internal_marks', 'mid_marks', 'final_marks', 'percentage_per_course', 'gpa_per_course', 'remarks', 'exam_record', 'program', 'semester', 'course', 'student']
+        fields = ['internal_marks', 'mid_marks', 'final_marks',  'gpa_per_course', 'remarks', 'exam_record', 'program', 'semester', 'course', 'student']
         widgets = {
             'internal_marks': forms.NumberInput(attrs={'class': 'form-control'}),
             'mid_marks': forms.NumberInput(attrs={'class': 'form-control'}),
             'final_marks': forms.NumberInput(attrs={'class': 'form-control'}),
-            'percentage_per_course': forms.NumberInput(attrs={'class': 'form-control'}),
             'gpa_per_course': forms.NumberInput(attrs={'class': 'form-control'}),
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
             'exam_record': forms.Select(attrs={'class': 'form-control'}),

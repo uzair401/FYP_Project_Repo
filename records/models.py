@@ -30,13 +30,24 @@ class ExamRecord(models.Model):
         return f"{self.record_name} ({self.session})"
 
 class StudentExamRecord(models.Model):
+    GRADE_CHOICES = [
+        ('F', 'F'),
+        ('C-', 'C-'),
+        ('C+', 'C+'),
+        ('B-', 'B-'),
+        ('B', 'B'),
+        ('B+', 'B+'),
+        ('A-', 'A-'),
+        ('A', 'A'),
+        ('A+', 'A+'),
+    ]
     student_exam_rec_id = models.AutoField(primary_key=True)
     internal_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage])
     mid_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage] )
     final_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage] )
     total_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage] )
-    percentage_per_course = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage] )
     gpa_per_course = models.DecimalField(max_digits=3, decimal_places=2, validators=[validate_gpa] )
+    grade = models.CharField(max_length=10, choices=GRADE_CHOICES)
     remarks = models.CharField(max_length=50)
     exam_record = models.ForeignKey(ExamRecord, on_delete=models.CASCADE)
     program = models.ForeignKey('academics.Program', on_delete=models.CASCADE)
@@ -55,9 +66,9 @@ class StudentSemesterRecord(models.Model):
     gpa_per_semester = models.DecimalField(max_digits=3, decimal_places=2, validators=[validate_gpa] )
     cgpa = models.DecimalField(max_digits=3, decimal_places=2, validators=[validate_gpa] )
     remarks = models.CharField(max_length=50)
-    exam_record = models.ForeignKey(ExamRecord, on_delete=models.CASCADE, )
-    student = models.ForeignKey('students.Student', on_delete=models.CASCADE, )
-    semester = models.ForeignKey('academics.Semester', on_delete=models.CASCADE, )
+    exam_record = models.ForeignKey(ExamRecord, on_delete=models.CASCADE)
+    student = models.ForeignKey('students.Student', on_delete=models.CASCADE)
+    semester = models.ForeignKey('academics.Semester', on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ('student', 'semester', 'exam_record')  # Unique per student, semester, and exam record
