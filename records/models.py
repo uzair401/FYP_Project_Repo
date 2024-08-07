@@ -17,13 +17,15 @@ class ExamRecord(models.Model):
         ('Spring', 'Spring'),
     ]
     record_id = models.AutoField(primary_key=True)
-    record_name = models.CharField(max_length=255)
+    record_name = models.CharField(max_length=255, unique=True)
     record_year = models.IntegerField()
     exam_date = models.DateField()
     session = models.CharField(max_length=10, choices=SESSION_CHOICES) 
     examiner = models.ForeignKey(User, on_delete=models.CASCADE)
     program = models.ForeignKey('academics.Program', on_delete=models.CASCADE)
-
+    def save(self, *args, **kwargs):    
+        self.record_name = self.record_name.upper()
+        super(ExamRecord, self).save(*args, **kwargs)
     class Meta:
         unique_together = ('record_name', 'record_year', 'exam_date')  # Assuming this combination should be unique
     def __str__(self):

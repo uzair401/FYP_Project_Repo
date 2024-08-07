@@ -100,7 +100,7 @@
             localStorage.removeItem('successMessage');
             setTimeout(function() {
                 $('#message-container').empty();
-            }, 2000);
+            }, 3000);
         }
 
         // Handle form submission via AJAX for Add Exam Record
@@ -122,14 +122,14 @@
                         $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
                         setTimeout(function() {
                             $('#message-container').empty();
-                        }, 2000);
+                        }, 3000);
                     }
                 },
                 error: function() {
                     $('#message-container').html('<div class="alert alert-danger">An error occurred while adding the exam record.</div>');
                     setTimeout(function() {
                         $('#message-container').empty();
-                    }, 2000);
+                    }, 3000);
                 }
             });
         });

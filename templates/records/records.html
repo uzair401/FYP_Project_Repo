@@ -30,6 +30,7 @@
                             <th>Total Marks</th>
                             <th>Grade</th>
                             <th>GPA</th>
+                            <th>Remarks</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -50,6 +51,7 @@
                             <td>{{ data.course.total_marks }}</td>
                             <td>{{ data.exam_record.grade }}</td>
                             <td>{{ data.exam_record.gpa_per_course }}</td>
+                            <td>{{ data.exam_record.remarks }}</td>
                             <td class="exclude">
                                 <button class="btn btn-primary btn-sm update-btn" data-student-id="{{ data.student.student_id }}" data-course-id="{{ data.course.course_id }}" data-semester-id="{{ data.semester_record.semester.semester_id }}">Update</button>
                                 <button class="btn btn-danger btn-sm reset-btn" data-student-id="{{ data.student.student_id }}" data-course-id="{{ data.course.course_id }}" data-semester-id="{{ data.semester_record.semester.semester_id }}">Reset</button>

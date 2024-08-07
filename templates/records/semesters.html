@@ -20,7 +20,7 @@
                     <tbody>
                         {% for enrollment in semesters %}
                         <tr>
-                            <td><a href="{% url 'records:courses' enrollment.semester.semester_id %}">{{ enrollment.semester }}</a></td>
+                            <td><a href="{% url 'records:courses' enrollment.semester.semester_id enrollment.batch.batch_id%}">{{ enrollment.semester }}</a></td>
                         </tr>
                         {% endfor %}
                     </tbody>

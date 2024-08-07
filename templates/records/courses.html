@@ -22,7 +22,7 @@
                     <tbody>
                         {% for course in courses %}
                         <tr>
-                            <td><a href="{% url 'records:course_student_records' course_id=course.course_id semester_id=semester.semester_id %}">{{ course.course_name }}</td>
+                            <td><a href="{% url 'records:course_student_records' course.course_id semester.semester_id batch.batch_id %}">{{ course.course_name }}</td>
                             <td>{{ course.course_code }}</td>
                         </tr>
                         {% endfor %}

@@ -3,11 +3,13 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from core.decorators import faculty_required
 from .models import ExamRecord, ExamEnrollment
-from academics.models import Course, Semester
+from academics.models import Course, Semester, Batch
 from .forms import ExamRecordForm, ExamEnrollmentForm
 from .models import StudentExamRecord, StudentSemesterRecord
-from students.models import Enrollment
-from .helpers import validate_marks
+from students.models import Enrollment 
+from .helpers import validate_marks, calculate_grade_point, calc_grade, check_pass_status
+from django.utils.dateparse import parse_date
+
 @login_required
 @faculty_required
 def exam_dashboard(request):
@@ -17,9 +19,7 @@ def exam_dashboard(request):
         update_forms = {record.record_id: ExamRecordForm(instance=record) for record in exam_records}
     elif request.user.role == 'Faculty':
         department_id = request.user.department.department_id
-        exam_records = ExamRecord.objects.filter(
-            program__department_id=department_id
-        )
+        exam_records = ExamRecord.objects.filter(program__department_id=department_id)
         form = ExamRecordForm(user=request.user, data=request.POST or None)  # Pass department_id to the form
         update_forms = {record.record_id: ExamRecordForm(instance=record, user=request.user) for record in exam_records}
     else:
@@ -36,16 +36,45 @@ def exam_dashboard(request):
 @login_required
 @faculty_required
 def add_record(request):
-    """
-    Handle the form submission for adding a new exam record.
-    """
-    form = ExamRecordForm(request.POST)
+    if request.method == 'POST':
+        form = ExamRecordForm(request.POST)
 
-    if form.is_valid():
-        form.save()
-        return JsonResponse({'success': True, 'message': 'Exam record added successfully!'})
+        if form.is_valid():
+            exam_record = form.save(commit=False)
+
+            # Define the timeframes for Spring and Fall sessions
+            spring_start_date = parse_date(f"{exam_record.record_year}-03-01")
+            spring_end_date = parse_date(f"{exam_record.record_year}-08-31")
+            fall_start_date = parse_date(f"{exam_record.record_year}-09-01")
+            fall_end_date = parse_date(f"{exam_record.record_year + 1}-02-28")  # Consider leap year for February end date
+
+            # Check for existing records based on the session
+            if exam_record.session == 'Spring':
+                existing_records = ExamRecord.objects.filter(
+                    exam_date__range=(spring_start_date, spring_end_date),
+                    session='Spring',
+                    program=exam_record.program,
+                    record_year=exam_record.record_year
+                )
+            elif exam_record.session == 'Fall':
+                existing_records = ExamRecord.objects.filter(
+                    exam_date__range=(fall_start_date, fall_end_date),
+                    session='Fall',
+                    program=exam_record.program,
+                    record_year=exam_record.record_year
+                )
+
+            if existing_records.exists():
+                return JsonResponse({'success': False, 'message': f'Exam record already exists for the {exam_record.session} session of this year within the specified timeframe.'})
+
+            # Save the new exam record if no duplicates are found
+            exam_record.save()
+            return JsonResponse({'success': True, 'message': 'Exam record added successfully!'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Error adding exam record: ' + str(form.errors)})
     else:
-        return JsonResponse({'success': False, 'message': 'Error adding exam record: ' + str(form.errors)})
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
 @login_required
 @faculty_required
 def batches(request, exam_record_id):
@@ -67,6 +96,7 @@ def batches(request, exam_record_id):
         'batches': batches,
         'update_forms': update_forms,
     })
+
 @login_required
 @faculty_required
 def update_batch(request, id):
@@ -79,7 +109,8 @@ def update_batch(request, id):
         else:
             return JsonResponse({'success': False, 'message': 'Failed to update batch. Errors: ' + str(form.errors)})
     else:
-        return JsonResponse({'success': False, 'message': 'Invalid request method'})
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
 @login_required
 @faculty_required
 def semesters(request, batch_id, exam_record_id):
@@ -88,25 +119,43 @@ def semesters(request, batch_id, exam_record_id):
     return render(request, 'records/semesters.html', {
         'semesters': semesters,
     })
+
 @login_required
 @faculty_required
-def courses(request, semester_id):
-    exam_enrollment = get_object_or_404(ExamEnrollment, semester__semester_id=semester_id)
-    courses = Course.objects.filter(semester=exam_enrollment.semester)
-
+def courses(request, semester_id, batch_id):
+    # Retrieve the semester and batch based on the provided IDs
+    semester = get_object_or_404(Semester, semester_id=semester_id)
+    batch = get_object_or_404(Batch, batch_id=batch_id)
+    
+    # Retrieve courses for the specified semester
+    courses = Course.objects.filter(semester=semester)
+    
     return render(request, 'records/courses.html', {
         'courses': courses,
-        'semester': exam_enrollment.semester,
+        'semester': semester,
+        'batch': batch,
     })
 
 @login_required
-def course_student_records(request, course_id, semester_id):
+def course_student_records(request, course_id, semester_id, batch_id):
     # Retrieve the selected course
     course = get_object_or_404(Course, course_id=course_id)
     
-    # Retrieve student exam records and semester records for the specified course and semester
-    student_exam_records = StudentExamRecord.objects.filter(course_id=course_id, semester_id=semester_id)
-    student_semester_records = StudentSemesterRecord.objects.filter(semester_id=semester_id)
+    # Retrieve the semester and batch
+    semester = get_object_or_404(Semester, semester_id=semester_id)
+    batch = get_object_or_404(Batch, batch_id=batch_id)
+    
+    # Retrieve student exam records and semester records for the specified course, semester, and batch
+    student_exam_records = StudentExamRecord.objects.filter(
+        course_id=course_id, 
+        semester_id=semester_id,
+        student__batch=batch
+    )
+    
+    student_semester_records = StudentSemesterRecord.objects.filter(
+        semester_id=semester_id,
+        student__batch=batch
+    )
     
     # Prepare data dictionary for template
     student_data = {}
@@ -122,9 +171,13 @@ def course_student_records(request, course_id, semester_id):
     context = {
         'course': course,
         'student_data': student_data,
+        'batch': batch,
+        'semester': semester,
     }
     
     return render(request, 'records/records.html', context)
+
+
 @login_required
 def update_student_record(request):
     if request.method == 'POST':
@@ -140,11 +193,26 @@ def update_student_record(request):
 
         # Validate marks before updating
         if validate_marks(internal_marks, mid_marks, final_marks, course.internal_marks, course.mid_marks, course.final_marks, course.total_marks):
-            print("function returned true")
+            total_marks_obtained = internal_marks + mid_marks + final_marks
             exam_record.internal_marks = internal_marks
             exam_record.mid_marks = mid_marks
             exam_record.final_marks = final_marks
-            exam_record.total_marks = internal_marks + mid_marks + final_marks
+            exam_record.total_marks = total_marks_obtained
+
+            # Calculate GPA per course
+            gpa_per_course = calculate_grade_point(total_marks_obtained, course.total_marks)
+            exam_record.gpa_per_course = gpa_per_course
+
+            # Calculate grade based on total marks obtained
+            grade = calc_grade(total_marks_obtained, course.total_marks)
+            exam_record.grade = grade
+            
+            # check if passed or failed 
+            pass_status = check_pass_status(total_marks_obtained, course.total_marks)
+            if pass_status == 'Failed':
+                exam_record.remarks = 'Failed'
+            else:
+                exam_record.remarks = '' 
             exam_record.save()
 
             return JsonResponse({'success': True, 'message': 'Record updated successfully!'})
@@ -167,7 +235,9 @@ def reset_student_record(request):
         exam_record.mid_marks = 0
         exam_record.final_marks = 0
         exam_record.total_marks = 0
-        exam_record.percentage_per_course = 0
+        exam_record.grade = ''
+        exam_record.remarks = ''
+        exam_record.gpa_per_course = 0.0
         exam_record.save()
 
         return JsonResponse({'success': True, 'message': 'Record reset successfully!'})
