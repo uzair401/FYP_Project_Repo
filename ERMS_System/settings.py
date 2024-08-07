@@ -55,7 +55,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.session_timeout_middleware.SessionTimeoutMiddleware',
 ]
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 
 ROOT_URLCONF = 'ERMS_System.urls'
 
@@ -75,7 +78,6 @@ TEMPLATES = [
         },
     },
 ]
-
 WSGI_APPLICATION = 'ERMS_System.wsgi.application'
 
 
@@ -140,3 +142,7 @@ LOGIN_REDIRECT_URL = '/'  # Redirect URL after login
 LOGOUT_REDIRECT_URL = '/login/'  # Redirect URL after logout
 LOGIN_URL = '/login/'
 AUTH_USER_MODEL = 'core.User'
+
+# Session Handlers
+SESSION_COOKIE_AGE = 600
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

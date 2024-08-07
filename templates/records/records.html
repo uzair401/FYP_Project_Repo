@@ -54,7 +54,9 @@
                             <td>{{ data.exam_record.remarks }}</td>
                             <td class="exclude">
                                 <button class="btn btn-primary btn-sm update-btn" data-student-id="{{ data.student.student_id }}" data-course-id="{{ data.course.course_id }}" data-semester-id="{{ data.semester_record.semester.semester_id }}">Update</button>
+                                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
                                 <button class="btn btn-danger btn-sm reset-btn" data-student-id="{{ data.student.student_id }}" data-course-id="{{ data.course.course_id }}" data-semester-id="{{ data.semester_record.semester.semester_id }}">Reset</button>
+                                {%endif%}
                             </td>
                         </tr>
                         {% empty %}
@@ -78,7 +80,7 @@
             dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
                  '<"row"<"col-sm-12"tr>>' +
                  '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-            lengthMenu: [[25, 50, 100], [25, 50, 100]],
+            lengthMenu: [[50, 100], [ 50, 100]],
             language: {
                 lengthMenu: "Show _MENU_ entries",
                 zeroRecords: "No records available",
@@ -92,7 +94,8 @@
                     next: "Next",
                     previous: "Previous"
                 }
-            }
+            },
+            order: [[2, 'asc']]
         });
 
         var successMessage = localStorage.getItem('successMessage');

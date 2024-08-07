@@ -7,6 +7,7 @@ from .forms import CustomUserCreationForm, CustomUserChangeForm
 from academics.models import Department
 from django.contrib.auth import logout
 from .decorators import faculty_required
+from django.views.decorators.csrf import csrf_exempt
 
 User = get_user_model()
 
@@ -101,10 +102,20 @@ def user_delete(request, user_id):
 
 
 @login_required
-def dashboard(request):
-    return render(request, 'core/dashboard.html')
 
-@login_required
+def dashboard(request):
+    if request.user.is_authenticated:
+        return render(request, 'core/dashboard.html')
+
+@csrf_exempt
 def Logout(request):
+    # Perform the logout operation
     logout(request)
+    
+    # Check if the request is AJAX
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # For AJAX requests, return a JSON response
+        return JsonResponse({'status': 'success', 'message': 'Logged out successfully'})
+    
+    # For non-AJAX requests, redirect to login
     return redirect('login')

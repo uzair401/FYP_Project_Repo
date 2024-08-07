@@ -7,17 +7,16 @@ from academics.models import Course, Semester, Batch
 from .forms import ExamRecordForm, ExamEnrollmentForm
 from .models import StudentExamRecord, StudentSemesterRecord
 from students.models import Enrollment 
-from .helpers import validate_marks, calculate_grade_point, calc_grade, check_pass_status
+from .helpers import validate_marks, calculate_grade_point, calc_grade, check_pass_status, calculate_semester_gpa, calculate_cgpa
 from django.utils.dateparse import parse_date
 
 @login_required
-@faculty_required
 def exam_dashboard(request):
     if request.user.role == 'Admin':
         exam_records = ExamRecord.objects.all()
         form = ExamRecordForm()  # Form without any filtering
         update_forms = {record.record_id: ExamRecordForm(instance=record) for record in exam_records}
-    elif request.user.role == 'Faculty':
+    elif request.user.role in ['Faculty','Editor']:
         department_id = request.user.department.department_id
         exam_records = ExamRecord.objects.filter(program__department_id=department_id)
         form = ExamRecordForm(user=request.user, data=request.POST or None)  # Pass department_id to the form
@@ -76,12 +75,11 @@ def add_record(request):
         return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 @login_required
-@faculty_required
 def batches(request, exam_record_id):
     if request.user.role == 'Admin':
         batches = ExamEnrollment.objects.filter(exam_record_id=exam_record_id)
         update_forms = {enrollment.id: ExamEnrollmentForm(instance=enrollment) for enrollment in batches}
-    elif request.user.role == 'Faculty':
+    elif request.user.role in ['Faculty', 'Editor']:
         department_id = request.user.department.department_id
         batches = ExamEnrollment.objects.filter(
             exam_record_id=exam_record_id,
@@ -112,7 +110,6 @@ def update_batch(request, id):
         return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 @login_required
-@faculty_required
 def semesters(request, batch_id, exam_record_id):
     semesters = ExamEnrollment.objects.filter(batch_id=batch_id, exam_record_id=exam_record_id)
     
@@ -121,7 +118,6 @@ def semesters(request, batch_id, exam_record_id):
     })
 
 @login_required
-@faculty_required
 def courses(request, semester_id, batch_id):
     # Retrieve the semester and batch based on the provided IDs
     semester = get_object_or_404(Semester, semester_id=semester_id)
@@ -207,21 +203,45 @@ def update_student_record(request):
             grade = calc_grade(total_marks_obtained, course.total_marks)
             exam_record.grade = grade
             
-            # check if passed or failed 
+            # Check if passed or failed 
             pass_status = check_pass_status(total_marks_obtained, course.total_marks)
             if pass_status == 'Failed':
                 exam_record.remarks = 'Failed'
             else:
                 exam_record.remarks = '' 
+            
             exam_record.save()
+
+            # Calculate semester GPA
+            gpa_data = calculate_semester_gpa(student_id, semester_id)
+
+            # Get or create StudentSemesterRecord for the current student and semester
+            student_semester_record, created = StudentSemesterRecord.objects.get_or_create(
+                student_id=student_id, 
+                semester_id=semester_id,
+                exam_record=exam_record.exam_record  # Ensure this matches the correct exam record
+            )
+            
+            # Update StudentSemesterRecord with the calculated values
+            student_semester_record.total_semester_marks = gpa_data['total_course_marks']
+            student_semester_record.semester_obtained_marks = gpa_data['total_obtained_marks']
+            student_semester_record.gpa_per_semester = gpa_data['semester_gpa']
+            student_semester_record.percentage = (gpa_data['total_obtained_marks'] / gpa_data['total_course_marks']) * 100
+            student_semester_record.save()
+
+            cgpa = calculate_cgpa(student_id)
+
+            # Update StudentSemesterRecord with CGPA
+            student_semester_record.cgpa = cgpa
+            student_semester_record.save()
 
             return JsonResponse({'success': True, 'message': 'Record updated successfully!'})
         else:
             return JsonResponse({'success': False, 'message': 'Entered marks are greater than course marks!'})
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=400)
-
 @login_required
+@faculty_required
 def reset_student_record(request):
     if request.method == 'POST':
         student_id = request.POST.get('student_id')
