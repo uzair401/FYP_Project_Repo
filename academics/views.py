@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, render
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Department, Program, Semester, Course, Batch
@@ -222,25 +223,40 @@ def semester_delete(request, semester_id):
 # Course Section 
 @login_required
 def course(request):
-    if request.user.role == 'Admin':
-        courses = Course.objects.all()
-        form = CourseForm()
-    elif request.user.role in ['Faculty', 'Editor']:
-        # Filter based on the department ID
-        departments = Department.objects.filter(department_id=request.user.department.department_id)
-        programs = Program.objects.filter(department__in=departments)
-        courses = Course.objects.filter(semester__program__in=programs)
-        form = CourseForm(department_id=request.user.department.department_id)
+    # Define a cache key based on the user's role and department (if applicable)
+    cache_key = f"course_view_{request.user.role}_{request.user.department.department_id if request.user.role in ['Faculty', 'Editor'] else 'all'}"
+    
+    # Try to get the cached data
+    cached_data = cache.get(cache_key)
+    
+    if cached_data:
+        # If cache is available, unpack the cached data
+        courses, form, update_forms = cached_data
     else:
-        courses = Course.objects.none()
-    update_forms = {course.course_id: CourseForm(instance=course,department_id=request.user.department.department_id) for course in courses}
+        # If cache is not available, perform the database queries
+        if request.user.role == 'Admin':
+            courses = Course.objects.all()
+            form = CourseForm()
+        elif request.user.role in ['Faculty', 'Editor']:
+            # Filter based on the department ID
+            departments = Department.objects.filter(department_id=request.user.department.department_id)
+            programs = Program.objects.filter(department__in=departments)
+            courses = Course.objects.filter(semester__program__in=programs)
+            form = CourseForm(department_id=request.user.department.department_id)
+        else:
+            courses = Course.objects.none()
+        
+        # Prepare the update forms
+        update_forms = {course.course_id: CourseForm(instance=course, department_id=request.user.department.department_id) for course in courses}
+        
+        # Cache the data for future use
+        cache.set(cache_key, (courses, form, update_forms), timeout=300)  # Cache for 5 minutes (300 seconds)
 
     return render(request, 'academics/course.html', {
         'courses': courses,
         'form': form,
         'update_forms': update_forms,
     })
-
 @csrf_exempt
 @login_required
 def add_course(request):

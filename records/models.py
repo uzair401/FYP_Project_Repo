@@ -47,7 +47,7 @@ class StudentExamRecord(models.Model):
     internal_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage])
     mid_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage] )
     final_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage] )
-    total_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage] )
+    total_marks = models.DecimalField(max_digits=5, decimal_places=2 )
     gpa_per_course = models.DecimalField(max_digits=3, decimal_places=2, validators=[validate_gpa] )
     grade = models.CharField(max_length=10, choices=GRADE_CHOICES)
     remarks = models.CharField(max_length=50)
@@ -62,8 +62,8 @@ class StudentExamRecord(models.Model):
 
 class StudentSemesterRecord(models.Model):
     student_exam_rec = models.ForeignKey(StudentExamRecord, on_delete=models.CASCADE)
-    total_semester_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage])
-    semester_obtained_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage])
+    total_semester_marks = models.DecimalField(max_digits=5, decimal_places=2)
+    semester_obtained_marks = models.DecimalField(max_digits=5, decimal_places=2)
     percentage = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage])
     gpa_per_semester = models.DecimalField(max_digits=3, decimal_places=2, validators=[validate_gpa] )
     cgpa = models.DecimalField(max_digits=3, decimal_places=2, validators=[validate_gpa] )

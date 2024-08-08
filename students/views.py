@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required

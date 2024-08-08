@@ -1,9 +1,9 @@
 from academics.models import Course, Semester
 from records.models import StudentExamRecord
 from students.models import Enrollment
+from records.models import StudentExamRecord
 
 from decimal import Decimal
-
 
 def validate_marks(obtained_internal, obtained_mid, obtained_final, course_internal, course_mid, course_final, course_total):
     if obtained_internal < 0 or obtained_mid < 0 or obtained_final < 0:
@@ -123,6 +123,7 @@ def calculate_semester_gpa(student_id, semester_id):
             weighted_grade_points_sum += weighted_grade_points
 
             total_obtained_marks += float(exam_record.total_marks)
+            print(total_obtained_marks)
         else:
             # If there's no exam record, treat the GPA as 0 for that course
             weighted_grade_points = 0.0
@@ -149,31 +150,32 @@ def calculate_semester_gpa(student_id, semester_id):
         'percentage': percentage
     }
 
-# records/helpers.py
 
-
-
-def calculate_cgpa(student_id):
+def calculate_cgpa(student_id, current_semester_id):
     """
-    Calculate the CGPA for a given student based on their performance across all semesters.
-    
+    Calculate the CGPA for a given student based on their performance across all semesters
+    up to and including the current semester.
+
     Args:
         student_id (int): The ID of the student.
-    
+        current_semester_id (int): The ID of the current semester.
+
     Returns:
         float: The CGPA of the student, truncated to 2 decimal places.
     """
     # Get all enrollments for the student
     enrollments = Enrollment.objects.filter(student_id=student_id)
     
-    # Extract semester IDs from these enrollments
+    # Extract semester IDs from these enrollments and filter up to the current semester
     semester_ids = enrollments.values_list('semester_id', flat=True).distinct()
-    
+    current_semester = Semester.objects.get(semester_id=current_semester_id)
+    relevant_semester_ids = [semester_id for semester_id in semester_ids if semester_id <= current_semester_id]
+
     total_credit_hours = Decimal('0.00')
     weighted_grade_points_sum = Decimal('0.00')
     
-    # Fetch all semesters with these IDs
-    semesters = Semester.objects.filter(semester_id__in=semester_ids)
+    # Fetch all relevant semesters
+    semesters = Semester.objects.filter(semester_id__in=relevant_semester_ids).order_by('semester_number')
     
     for semester in semesters:
         # Fetch all courses for the current semester
@@ -206,3 +208,27 @@ def calculate_cgpa(student_id):
     cgpa = Decimal(int(cgpa * 100)) / Decimal('100.00')
     
     return float(cgpa)
+
+
+def check_current_semester_status(student_id, semester_id):
+    failed_courses = []
+
+    # Retrieve all StudentExamRecords for the student in the current semester
+    exam_records = StudentExamRecord.objects.filter(student_id=student_id, semester_id=semester_id)
+    
+    for exam_record in exam_records:
+        course = exam_record.course
+        
+        # First check using check_pass_status function
+        total_marks_obtained = exam_record.total_marks
+        if check_pass_status(total_marks_obtained, course.total_marks) == 'Failed':
+            failed_courses.append(course.course_code)
+            continue  # Skip the second check if the first one already determined failure
+        
+        # Second check directly using exam_record.remarks
+        if exam_record.remarks == 'Failed':
+            failed_courses.append(course.course_code)
+
+    if failed_courses:
+        return failed_courses
+    return None

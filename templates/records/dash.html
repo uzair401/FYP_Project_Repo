@@ -1,0 +1,39 @@
+{% extends "adminlte/base.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- First Infobox -->
+    <div class="col-12 col-sm-6 col-md-4">
+        <div class="info-box clickable" onclick="location.href='{% url 'records:semester_record_dashboard' %}';">
+            <span class="info-box-icon bg-info elevation-1 "><i class="fas fa-clipboard-check"></i></span>
+            <div class="info-box-content">
+                <a href="{% url 'records:semester_record_dashboard' %}" style="text-decoration: none; color: inherit;">
+                    <span class="info-box-text"><h4>Semester Results</h4></span>
+                </a>
+                <span class="info-box-number"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Infobox -->
+    <div class="col-12 col-sm-6 col-md-4">
+        <div class="info-box clickable" onclick="location.href='#">
+            <span class="info-box-icon bg-success elevation-1"><i class="fas fa-chalkboard-teacher"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text"><h4>Courses Results<h4></span>
+                <span class="info-box-number"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Third Infobox -->
+    <div class="col-12 col-sm-6 col-md-4">
+        <div class="info-box clickable" onclick="location.href='#;">
+            <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-graduation-cap"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text"><h4>Transcript<h4></span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
