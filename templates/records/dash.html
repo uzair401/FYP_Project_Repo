@@ -17,23 +17,28 @@
 
     <!-- Second Infobox -->
     <div class="col-12 col-sm-6 col-md-4">
-        <div class="info-box clickable" onclick="location.href='#">
+        <div class="info-box clickable" onclick="location.href='{% url 'records:courses_record_dashboard' %}';">
             <span class="info-box-icon bg-success elevation-1"><i class="fas fa-chalkboard-teacher"></i></span>
             <div class="info-box-content">
-                <span class="info-box-text"><h4>Courses Results<h4></span>
-                <span class="info-box-number"></span>
+                <a href="{% url 'records:courses_record_dashboard' %}" style="text-decoration: none; color: inherit;">
+                    <span class="info-box-text"><h4>Courses Results</h4></span>
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Third Infobox -->
     <div class="col-12 col-sm-6 col-md-4">
-        <div class="info-box clickable" onclick="location.href='#;">
+        <div class="info-box clickable" onclick="location.href='{% url 'records:Transcript_Program' %}';">
             <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-graduation-cap"></i></span>
             <div class="info-box-content">
-                <span class="info-box-text"><h4>Transcript<h4></span>
+                <a href="{% url 'records:Transcript_Program' %}" style="text-decoration: none; color: inherit;">
+                    <span class="info-box-text"><h4>Generate Transcript</h4></span>
+                </a>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+
+

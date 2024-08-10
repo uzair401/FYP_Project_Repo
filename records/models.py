@@ -31,6 +31,26 @@ class ExamRecord(models.Model):
     def __str__(self):
         return f"{self.record_name} ({self.session})"
 
+class ExamRecord(models.Model):
+    SESSION_CHOICES = [
+        ('Fall', 'Fall'),
+        ('Spring', 'Spring'),
+    ]
+    record_id = models.AutoField(primary_key=True)
+    record_name = models.CharField(max_length=255, unique=True)
+    record_year = models.IntegerField()
+    exam_date = models.DateField()
+    session = models.CharField(max_length=10, choices=SESSION_CHOICES) 
+    examiner = models.ForeignKey(User, on_delete=models.CASCADE)
+    program = models.ForeignKey('academics.Program', on_delete=models.CASCADE)
+    def save(self, *args, **kwargs):    
+        self.record_name = self.record_name.upper()
+        super(ExamRecord, self).save(*args, **kwargs)
+    class Meta:
+        unique_together = ('record_name', 'record_year', 'exam_date')  # Assuming this combination should be unique
+    def __str__(self):
+        return f"{self.record_name} ({self.session})"
+
 class StudentExamRecord(models.Model):
     GRADE_CHOICES = [
         ('F', 'F'),
@@ -43,6 +63,10 @@ class StudentExamRecord(models.Model):
         ('A', 'A'),
         ('A+', 'A+'),
     ]
+    REPEATED_CHOICES = [
+        ('No', 'No'),
+        ('Yes', 'Yes'),
+    ]
     student_exam_rec_id = models.AutoField(primary_key=True)
     internal_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage])
     mid_marks = models.DecimalField(max_digits=5, decimal_places=2, validators=[validate_percentage] )
@@ -51,6 +75,11 @@ class StudentExamRecord(models.Model):
     gpa_per_course = models.DecimalField(max_digits=3, decimal_places=2, validators=[validate_gpa] )
     grade = models.CharField(max_length=10, choices=GRADE_CHOICES)
     remarks = models.CharField(max_length=50)
+    is_repeated = models.CharField(
+        max_length=3,
+        choices=REPEATED_CHOICES,
+        default='No'
+    )
     exam_record = models.ForeignKey(ExamRecord, on_delete=models.CASCADE)
     program = models.ForeignKey('academics.Program', on_delete=models.CASCADE)
     semester = models.ForeignKey('academics.Semester', on_delete=models.CASCADE)

@@ -1,0 +1,133 @@
+{% extends "adminlte/base.html" %}
+{% load static %}
+{% block content %}
+
+<!-- Message Container -->
+<div id="message-container" class="alert-container"></div>
+
+<style>
+    @media print {
+        .failed-mark {
+            color: red !important;
+        }
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <strong>
+                        Course Results: Course {{ course.course_name }} - Semester {{ semester.semester_number }} {{ semester.semester_category }} - {{ batch.batch_name }} - Exam-Year: {{ exam_record.record_name }}
+                    </strong>
+                </h3>
+            </div>
+            <div class="card-body table-responsive">
+                <table id="course-results-table" class="table table-striped table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Father Name</th>
+                            <th>Registration Number</th>
+                            <th>Internal Marks</th>
+                            <th>Mid Marks</th>
+                            <th>Final Marks</th>
+                            <th>Total Obtained Marks</th>
+                            <th>Total Course Marks</th>
+                            <th>Grade</th>
+                            <th>Percentage</th>
+                            <th>GPA</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student_data in students %}
+                        <tr>
+                            <td>{{ student_data.student.first_name }} {{ student_data.student.last_name }}</td>
+                            <td>{{ student_data.student.father_name }}</td>
+                            <td>{{ student_data.student.registration_number }}</td>
+                            <td>{{ student_data.internal_marks }}</td>
+                            <td>{{ student_data.mid_marks }}</td>
+                            <td>{{ student_data.final_marks }}</td>
+                            <td>{{ student_data.total_obtained_marks }}</td>
+                            <td>{{ student_data.total_full_marks }}</td>
+                            <td>{{ student_data.grade }}</td>
+                            <td>{{ student_data.percentage|floatformat:2}}</td>
+                            <td>{{ student_data.gpa|floatformat:2 }}</td>
+                            <td>{{ student_data.remarks }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="12">No records available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include necessary scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#course-results-table').DataTable({
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f,B>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            lengthMenu: [[50, 100], [50, 100]],
+            buttons: [
+                'excel', 'pdf', 
+                {
+                    extend: 'print',
+                    className: 'btn btn-info float-right print-button',
+                    text: 'Print',
+                    customize: function(win) {
+                        $(win.document.body).find('h1').remove();
+                        $(win.document.head).append('<style>@media print {.failed-mark { color: red !important; }}</style>');
+                        $(win.document.body).prepend(
+                            '<table>' +
+                                '<tr>' +
+                                    '<td><strong>Department:</strong></td>' +
+                                    '<td><strong>{{ semester.program.department.department_name }}</strong></td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                    '<td><strong>Program:</strong></td>' +
+                                    '<td><strong>{{ semester.program.program_name }}</strong></td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                    '<td><strong>Batch:</strong></td>' +
+                                    '<td><strong>{{ batch.batch_name }}</strong></td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                    '<td><strong>Semester:</strong></td>' +
+                                    '<td><strong>{{ semester.semester_number }} {{ semester.semester_category }}</strong></td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                    '<td><strong>Course:</strong></td>' +
+                                    '<td><strong>{{ course.course_name }}</strong></td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                    '<td><strong>Course Code:</strong></td>' +
+                                    '<td><strong>{{ course.course_code }}</strong></td>' +
+                                '</tr>' +
+                                '<tr>' +
+                                    '<td><strong>Exam Record:</strong></td>' +
+                                    '<td><strong>{{ exam_record.record_name }}</strong></td>' +
+                                '</tr>' +
+                            '</table><br>'
+                        );
+                    }
+                }
+            ],
+            "order": [[ 2, "asc" ]]
+        });
+    });
+</script>
+{% endblock %}

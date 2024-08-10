@@ -38,7 +38,7 @@
 <script>
     $(document).ready(function() {
         $('#students-table').DataTable({
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f {% if request.user.role == 'Faculty' or request.user.role == 'Admin'  %} B {%endif%}>>' +
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f >>' +
                  '<"row"<"col-sm-12"tr>>' +
                  '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
                  {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
@@ -70,8 +70,9 @@
                  },
                  
              ],
+             
              {%endif%}
-            lengthMenu: [[25, 50, 100], [25, 50, 100]],
+            lengthMenu: [[50, 100], [50, 100]],
             language: {
                 lengthMenu: "Show _MENU_ entries",
                 zeroRecords: "No records available",

@@ -31,6 +31,7 @@
                             <th>Grade</th>
                             <th>GPA</th>
                             <th>Remarks</th>
+                            <th>Repeated</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -52,6 +53,15 @@
                             <td>{{ data.exam_record.grade }}</td>
                             <td>{{ data.exam_record.gpa_per_course }}</td>
                             <td>{{ data.exam_record.remarks }}</td>
+                            <td>
+                                <select class="form-control is-repeated-select" 
+                                        data-student-id="{{ data.student.student_id }}" 
+                                        data-course-id="{{ data.course.course_id }}" 
+                                        data-semester-id="{{ data.semester_record.semester.semester_id }}">
+                                    <option value="Yes" {% if data.exam_record.is_repeated == "Yes" %}selected{% endif %}>Yes</option>
+                                    <option value="No" {% if data.exam_record.is_repeated == "No" %}selected{% endif %}>No</option>
+                                </select>
+                            </td>
                             <td class="exclude">
                                 <button class="btn btn-primary btn-sm update-btn" data-student-id="{{ data.student.student_id }}" data-course-id="{{ data.course.course_id }}" data-semester-id="{{ data.semester_record.semester.semester_id }}">Update</button>
                                 {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
@@ -80,7 +90,7 @@
             dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
                  '<"row"<"col-sm-12"tr>>' +
                  '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-            lengthMenu: [[50, 100], [ 50, 100]],
+            lengthMenu: [[50, 100], [50, 100]],
             language: {
                 lengthMenu: "Show _MENU_ entries",
                 zeroRecords: "No records available",
@@ -116,6 +126,7 @@
             var finalMarks = row.find('input[name="final_marks"]').val();
             var courseId = $(this).data('course-id');
             var semesterId = $(this).data('semester-id');
+            var isRepeated = row.find('.is-repeated-select').val();  // Get value from select
 
             // Perform AJAX request to update the data
             $.ajax({
@@ -128,6 +139,7 @@
                     final_marks: finalMarks,
                     course_id: courseId,
                     semester_id: semesterId,
+                    is_repeated: isRepeated === 'Yes' ? '1' : '0',  // Convert to 0 or 1
                     csrfmiddlewaretoken: '{{ csrf_token }}'
                 },
                 success: function(response) {
@@ -157,6 +169,37 @@
                     student_id: studentId,
                     course_id: courseId,
                     semester_id: semesterId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                    }
+                }
+            });
+        });
+
+        // Handle change event for the repeated select element
+        $('.is-repeated-select').change(function() {
+            var selectedValue = $(this).val();
+            var studentId = $(this).data('student-id');
+            var courseId = $(this).data('course-id');
+            var semesterId = $(this).data('semester-id');
+
+            // Perform AJAX request to update the data
+            $.ajax({
+                type: 'POST',
+                url: '{% url "records:update_student_record" %}',  // Make sure this URL matches your actual endpoint
+                data: {
+                    student_id: studentId,
+                    course_id: courseId,
+                    semester_id: semesterId,
+                    is_repeated: selectedValue === 'Yes' ? '1' : '0',  // Convert to 0 or 1
                     csrfmiddlewaretoken: '{{ csrf_token }}'
                 },
                 success: function(response) {

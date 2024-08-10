@@ -24,10 +24,12 @@ class StudentExamRecordAdmin(admin.ModelAdmin):
         'total_marks',
         'gpa_per_course',
         'remarks',
+        'is_repeated',  # Added is_repeated here
         'exam_record',                                              
     )
     search_fields = ('student__first_name', 'student__last_name', 'course__course_name')
     list_filter = ('program', 'semester', 'course')
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.role == 'Faculty':

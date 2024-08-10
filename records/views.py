@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
+from collections import OrderedDict
 from django.contrib.auth.decorators import login_required
 from core.decorators import faculty_required
 from .models import ExamRecord, ExamEnrollment
-from academics.models import Course, Semester, Batch
+from academics.models import Course, Semester, Batch ,Program
 from .forms import ExamRecordForm, ExamEnrollmentForm
 from .models import StudentExamRecord, StudentSemesterRecord
 from students.models import Enrollment, Student
@@ -137,54 +138,45 @@ def courses(request, semester_id, batch_id):
     })
 @login_required
 def course_student_records(request, course_id, semester_id, batch_id):
-    # Generate a unique cache key
-    cache_key = f"course_student_records_{course_id}_{semester_id}_{batch_id}"
+    # Retrieve the selected course
+    course = get_object_or_404(Course, course_id=course_id)
     
-    # Check if the data is already cached
-    context = cache.get(cache_key)
+    # Retrieve the semester and batch
+    semester = get_object_or_404(Semester, semester_id=semester_id)
+    batch = get_object_or_404(Batch, batch_id=batch_id)
     
-    if not context:
-        # Retrieve the selected course
-        course = get_object_or_404(Course, course_id=course_id)
-        
-        # Retrieve the semester and batch
-        semester = get_object_or_404(Semester, semester_id=semester_id)
-        batch = get_object_or_404(Batch, batch_id=batch_id)
-        
-        # Retrieve student exam records and semester records for the specified course, semester, and batch
-        student_exam_records = StudentExamRecord.objects.filter(
-            course_id=course_id, 
-            semester_id=semester_id,
-            student__batch=batch
-        )
-        
-        student_semester_records = StudentSemesterRecord.objects.filter(
-            semester_id=semester_id,
-            student__batch=batch
-        )
-        
-        # Prepare data dictionary for template
-        student_data = {}
-        for exam_record in student_exam_records:
-            student = exam_record.student
-            student_data[student.student_id] = {
-                'student': student,
-                'course': course,
-                'exam_record': exam_record,
-                'semester_record': student_semester_records.filter(student=student).first(),
-            }
-        
-        context = {
+    # Retrieve student exam records and semester records for the specified course, semester, and batch
+    student_exam_records = StudentExamRecord.objects.filter(
+        course_id=course_id, 
+        semester_id=semester_id,
+        student__batch=batch
+    )
+    
+    student_semester_records = StudentSemesterRecord.objects.filter(
+        semester_id=semester_id,
+        student__batch=batch
+    )
+    
+    # Prepare data dictionary for template
+    student_data = {}
+    for exam_record in student_exam_records:
+        student = exam_record.student
+        student_data[student.student_id] = {
+            'student': student,
             'course': course,
-            'student_data': student_data,
-            'batch': batch,
-            'semester': semester,
+            'exam_record': exam_record,
+            'semester_record': student_semester_records.filter(student=student).first(),
         }
-        
-        # Cache the context data for a specified period (e.g., 10 minutes)
-        cache.set(cache_key, context, timeout=600)  # Cache for 600 seconds (10 minutes)
+    
+    context = {
+        'course': course,
+        'student_data': student_data,
+        'batch': batch,
+        'semester': semester,
+    }
     
     return render(request, 'records/records.html', context)
+
 
 @login_required
 def update_student_record(request):
@@ -208,7 +200,6 @@ def update_student_record(request):
                 exam_record.mid_marks = mid_marks
                 exam_record.final_marks = final_marks
                 exam_record.total_marks = total_marks_obtained  # Store the actual obtained marks, not normalized
-
                 # Calculate GPA per course based on the actual obtained marks
                 gpa_per_course = helpers.calculate_grade_point(total_marks_obtained, course.total_marks)
                 exam_record.gpa_per_course = gpa_per_course
@@ -220,9 +211,9 @@ def update_student_record(request):
                 # Check if passed or failed
                 pass_status = helpers.check_pass_status(total_marks_obtained, course.total_marks)
                 exam_record.remarks = 'Failed' if pass_status == 'Failed' else ''
+                exam_record.is_repeated = "Yes" if int(request.POST.get('is_repeated')) == 1 else "No"
 
                 exam_record.save()
-
                 # Calculate semester GPA
                 gpa_data = helpers.calculate_semester_gpa(student_id, semester_id)
 
@@ -280,6 +271,7 @@ def reset_student_record(request):
         exam_record.grade = ''
         exam_record.remarks = ''
         exam_record.gpa_per_course = 0.0
+        exam_record.is_repeated = 'No'
         exam_record.save()
 
         return JsonResponse({'success': True, 'message': 'Record reset successfully!'})
@@ -298,7 +290,7 @@ def semesters_rec_dash(request):
     else:
         exam_records = ExamRecord.objects.none()
 
-    return render(request, 'records/semesters_records_dash.html', {
+    return render(request, 'records/semester/semesters_records_dash.html', {
         'exam_records': exam_records,
     })
 
@@ -314,7 +306,7 @@ def records_batches(request, exam_record_id):
         )
     else:
         batches = ExamEnrollment.objects.none()
-    return render(request, 'records/batch_results_dash.html', {
+    return render(request, 'records/semester/batch_results_dash.html', {
         'batches': batches,
     })
 
@@ -322,7 +314,7 @@ def records_batches(request, exam_record_id):
 def records_semester(request, batch_id, exam_record_id):
     semesters = ExamEnrollment.objects.filter(batch_id=batch_id, exam_record_id=exam_record_id)
     
-    return render(request, 'records/results_semesters_dash.html', {
+    return render(request, 'records/semester/results_semesters_dash.html', {
         'semesters': semesters,
     })
 
@@ -380,6 +372,7 @@ def semester_results(request, semester_id, batch_id, exam_record_id):
                 course = get_object_or_404(Course, course_id=record.course_id)
                 student_data['courses'][course.course_id]['obtained_marks'] = record.total_marks
                 student_data['courses'][course.course_id]['gpa_per_course'] = record.gpa_per_course
+                student_data['courses'][course.course_id]['remarks'] = record.remarks
                 student_data['total_obtained_marks'] += record.total_marks
                 student_data['total_full_marks'] += course.total_marks
             
@@ -388,125 +381,225 @@ def semester_results(request, semester_id, batch_id, exam_record_id):
         # Cache the context data for a specified period (e.g., 10 minutes)
         cache.set(cache_key, context, timeout=600)  # Cache for 600 seconds (10 minutes)
     
-    return render(request, 'records/semester_result.html', context)
+    return render(request, 'records/semester/semester_result.html', context)
 
 
+# Course results Section 
+@login_required
+def courses_rec_dash(request):
+    if request.user.role == 'Admin':
+        exam_records = ExamRecord.objects.all()
+    elif request.user.role in ['Faculty', 'Editor']:
+        department_id = request.user.department.department_id
+        exam_records = ExamRecord.objects.filter(program__department_id=department_id)
+    else:
+        exam_records = ExamRecord.objects.none()
 
-# @login_required
-# def courses_rec_dash(request):
-#     if request.user.role == 'Admin':
-#         exam_records = ExamRecord.objects.all()
-#     elif request.user.role in ['Faculty','Editor']:
-#         department_id = request.user.department.department_id
-#         exam_records = ExamRecord.objects.filter(program__department_id=department_id)
-#     else:
-#         exam_records = ExamRecord.objects.none()
+    return render(request, 'records/courses/course_records.html', {
+        'exam_records': exam_records,
+    })
 
-#     return render(request, 'records/semesters_records_dash.html', {
-#         'exam_records': exam_records,
-#     })
+@login_required
+def course_records_batches(request, exam_record_id):
+    if request.user.role == 'Admin':
+        batches = ExamEnrollment.objects.filter(exam_record_id=exam_record_id)
+    elif request.user.role in ['Faculty', 'Editor']:
+        department_id = request.user.department.department_id
+        batches = ExamEnrollment.objects.filter(
+            exam_record_id=exam_record_id,
+            exam_record__program__department_id=department_id
+        )
+    else:
+        batches = ExamEnrollment.objects.none()
+        
+    return render(request, 'records/courses/courses_batch.html', {
+        'batches': batches,
+    })
 
-# @login_required
-# def course_records_batches(request, exam_record_id):
-#     if request.user.role == 'Admin':
-#         batches = ExamEnrollment.objects.filter(exam_record_id=exam_record_id)
-#     elif request.user.role in ['Faculty', 'Editor']:
-#         department_id = request.user.department.department_id
-#         batches = ExamEnrollment.objects.filter(
-#             exam_record_id=exam_record_id,
-#             exam_record__program__department_id=department_id
-#         )
-#     else:
-#         batches = ExamEnrollment.objects.none()
-#     return render(request, 'records/batch_results_dash.html', {
-#         'batches': batches,
-#     })
-
-# @login_required
-# def records_semester(request, batch_id, exam_record_id):
-#     semesters = ExamEnrollment.objects.filter(batch_id=batch_id, exam_record_id=exam_record_id)
+@login_required
+def courses_semesters(request, batch_id, exam_record_id):
+    semesters = ExamEnrollment.objects.filter(batch_id=batch_id, exam_record_id=exam_record_id)
     
-#     return render(request, 'records/results_semesters_dash.html', {
-#         'semesters': semesters,
-#     })
+    return render(request, 'records/courses/courses_semesters.html', {
+        'semesters': semesters,
+    })
 
-
-
-# @login_required
-# def semester_results(request, semester_id, batch_id, exam_record_id):
-#     # Generate a unique cache key
-#     cache_key = f"semester_results_{semester_id}_{batch_id}_{exam_record_id}"
+@login_required
+def courses_record(request, semester_id, batch_id):
+    semester = get_object_or_404(Semester, semester_id=semester_id)
+    batch = get_object_or_404(Batch, batch_id=batch_id)
     
-#     # Check if the data is already cached
-#     context = cache.get(cache_key)
+    courses = Course.objects.filter(semester=semester)
     
-#     if not context:
-#         # Retrieve the semester, batch, and exam record
-#         semester = get_object_or_404(Semester, semester_id=semester_id)
-#         batch = get_object_or_404(Batch, batch_id=batch_id)
-#         exam_record = get_object_or_404(ExamRecord, record_id=exam_record_id)
-        
-#         # Retrieve the courses for the semester
-#         courses = Course.objects.filter(semester=semester)
-        
-#         # Retrieve students in the batch
-#         students = Student.objects.filter(batch=batch)
-        
-#         # Initialize context data
-#         context = {
-#             'semester': semester,
-#             'batch': batch,
-#             'exam_record': exam_record,
-#             'courses': courses,
-#             'students': []
-#         }
-        
-#         for student in students:
-#             # Retrieve exam and semester records for each student
-#             student_exam_records = StudentExamRecord.objects.filter(student=student, semester=semester, exam_record=exam_record)
-#             student_semester_record = get_object_or_404(StudentSemesterRecord, student=student, semester=semester)
+    return render(request, 'records/courses/courses_courses.html', {
+        'courses': courses,
+        'semester': semester,
+        'batch': batch,
+    })
 
-#             # Prepare data for each student
-#             student_data = {
-#                 'student': student,
-#                 'courses': {course.course_id: {
-#                     'course': course,
-#                     'obtained_marks': 0,
-#                     'gpa_per_course': 0
-#                 } for course in courses},  # Initialize with default values
-#                 'total_obtained_marks': 0,
-#                 'total_full_marks': 0,
-#                 'percentage': student_semester_record.percentage,
-#                 'gpa_per_semester': student_semester_record.gpa_per_semester,
-#                 'cgpa': student_semester_record.cgpa,
-#                 'remarks': student_semester_record.remarks
-#             }
+@login_required
+def course_results(request, semester_id, batch_id, course_id):
+    cache_key = f"course_results_{semester_id}_{batch_id}_{course_id}"
+    context = cache.get(cache_key)
+    
+    if not context:
+        semester = get_object_or_404(Semester, semester_id=semester_id)
+        batch = get_object_or_404(Batch, batch_id=batch_id)
+        course = get_object_or_404(Course, course_id=course_id)
+
+        # Derive the exam record based on batch and semester
+        exam_record = ExamRecord.objects.filter(
+            examenrollment__batch=batch,
+            examenrollment__semester=semester
+        ).first()
+
+        if not exam_record:
+            raise Http404("Exam record not found.")
+        
+        students = Student.objects.filter(batch=batch)
+        
+        context = {
+            'semester': semester,
+            'batch': batch,
+            'exam_record': exam_record,
+            'course': course,
+            'students': []
+        }
+        
+        for student in students:
+            student_exam_record = StudentExamRecord.objects.filter(
+                student=student,
+                semester=semester,
+                exam_record=exam_record,
+                course=course
+            ).first()
             
-#             for record in student_exam_records:
-#                 course = get_object_or_404(Course, course_id=record.course_id)
-#                 student_data['courses'][course.course_id]['obtained_marks'] = record.total_marks
-#                 student_data['courses'][course.course_id]['gpa_per_course'] = record.gpa_per_course
-#                 student_data['total_obtained_marks'] += record.total_marks
-#                 student_data['total_full_marks'] += course.total_marks
+            student_semester_record = StudentSemesterRecord.objects.filter(student=student, semester=semester).first()
             
-#             context['students'].append(student_data)
-        
-#         # Cache the context data for a specified period (e.g., 10 minutes)
-#         cache.set(cache_key, context, timeout=600)  # Cache for 600 seconds (10 minutes)
-    
-#     return render(request, 'records/semester_result.html', context)
+            internal_marks = mid_marks = final_marks = total_obtained_marks = total_full_marks = percentage = gpa = remarks = 0
 
-# @login_required
-# def courses(request, semester_id, batch_id):
-#     # Retrieve the semester and batch based on the provided IDs
-#     semester = get_object_or_404(Semester, semester_id=semester_id)
-#     batch = get_object_or_404(Batch, batch_id=batch_id)
+            if student_exam_record:
+                internal_marks = student_exam_record.internal_marks
+                mid_marks = student_exam_record.mid_marks
+                final_marks = student_exam_record.final_marks
+                total_obtained_marks = student_exam_record.total_marks
+                total_full_marks = course.total_marks
+                percentage = (total_obtained_marks / total_full_marks) * 100 if total_full_marks > 0 else 0
+                gpa = student_exam_record.gpa_per_course
+                remarks = student_exam_record.remarks
+                grade = student_exam_record.grade
+            
+            context['students'].append({
+                'student': student,
+                'internal_marks': internal_marks,
+                'mid_marks': mid_marks,
+                'final_marks': final_marks,
+                'total_obtained_marks': total_obtained_marks,
+                'total_full_marks': total_full_marks,
+                'percentage': percentage,
+                'gpa': gpa,
+                'grade': grade,
+                'remarks': remarks,
+            })
+        
+        cache.set(cache_key, context, timeout=600)
     
-#     # Retrieve courses for the specified semester
-#     courses = Course.objects.filter(semester=semester)
+    return render(request, 'records/courses/courses_results.html', context)
+
+@login_required
+def transcript_program_selection(request):
+    if request.user.role == 'Admin':
+        programs = Program.objects.all()
+    elif request.user.role == 'Faculty':
+        programs = Program.objects.filter(department_id=request.user.department.department_id)
+    else:
+        programs = Program.objects.none()
     
-#     return render(request, 'records/courses.html', {
-#         'courses': courses,
-#         'semester': semester,
-#         'batch': batch,
-#     })
+    return render(request, 'records/transcript/program_selection.html', {
+        'programs': programs,
+    })
+
+@login_required
+def transcript_batch(request, program_id):
+    batches = Batch.objects.filter(program_id=program_id)
+    return render(request, 'records/transcript/batches.html', {
+        'batches': batches,
+    })
+
+@login_required
+def transcript_student(request, batch_id):
+    students = Student.objects.filter(batch_id=batch_id)
+
+    return render(request, 'records/transcript/transcript_students.html', {'students':students})
+
+
+
+def student_transcript(request, student_id):
+    # Retrieve the student record
+    student = get_object_or_404(Student, pk=student_id)
+    
+    # Retrieve the student's exam records
+    student_records = StudentExamRecord.objects.filter(student=student)
+    
+    # Retrieve the student's semester records
+    semester_records = StudentSemesterRecord.objects.filter(student=student)
+    
+    # Optionally get semesters to include from request
+    include_semesters = request.GET.getlist('include_semesters', [])
+    
+    # Prepare a dictionary for semester records with nested course data
+    semester_records_dict = {}
+    for semester_record in semester_records:
+        semester_number = semester_record.semester.semester_number
+        
+        # Check if this semester should be included
+        if include_semesters and str(semester_number) not in include_semesters:
+            continue
+        
+        # Initialize the dictionary for the semester if not already present
+        if semester_number not in semester_records_dict:
+            semester_records_dict[semester_number] = {
+                'semesternumber': semester_record.semester.semester_number,
+                'semester_category': semester_record.semester.semester_category,
+                'program': semester_record.exam_record.program.program_name,
+                'exam_date': semester_record.exam_record.exam_date,
+                'total_semester_marks': semester_record.total_semester_marks,
+                'total_obtained_marks': semester_record.semester_obtained_marks,
+                'gpa_per_semester': semester_record.gpa_per_semester,
+                'cgpa': semester_record.cgpa,
+                'courses': {},
+                'total_credit_hours': sum(
+                    record.course.credit_hours for record in student_records.filter(semester=semester_record.semester)
+                ),
+                'has_failed_course': any(
+                    record.remarks and "Failed" in record.remarks for record in student_records.filter(semester=semester_record.semester)
+                )
+            }
+        
+        # Filter student records for the current semester
+        semester_courses = student_records.filter(semester=semester_record.semester)
+        
+        # Populate the course data for this semester
+        for record in semester_courses:
+            semester_records_dict[semester_number]['courses'][record.course.course_name] = {
+                'course_name': record.course.course_name,
+                'course_code': record.course.course_code,
+                'credit_hours': record.course.credit_hours,
+                'obtained_marks': record.total_marks,
+                'is_repeated': record.is_repeated,
+                'total_marks': record.course.total_marks,
+                'gpa_per_course': record.gpa_per_course,
+                'remarks': record.remarks,
+            }
+    
+    # Sort the semester_records_dict by semester number (keys)
+    sorted_semester_records = OrderedDict(sorted(semester_records_dict.items()))
+
+    # Create a context dictionary for the template
+    context = {
+        'student': student,
+        'semester_records': sorted_semester_records
+    }
+    
+    return render(request, 'records/transcript/transcript.html', context)
+

@@ -17,6 +17,15 @@ urlpatterns = [
     path('records-dashboard', views.semesters_rec_dash, name='semester_record_dashboard'),
     path('batch/<int:exam_record_id>/', views.records_batches, name='records_batches'),
     path('semester/<int:batch_id>/<int:exam_record_id>/', views.records_semester, name='record_semester'),
-    path('records/semester-results/<int:exam_record_id>/<int:semester_id>/<int:batch_id>/', views.semester_results, name='semester_results')
+    path('records/semester-results/<int:exam_record_id>/<int:semester_id>/<int:batch_id>/', views.semester_results, name='semester_results'),
+    path('courses-records/', views.courses_rec_dash, name='courses_record_dashboard'),
+    path('course-batch/<int:exam_record_id>/', views.course_records_batches, name='course_records_batches'),
+    path('course-semester/<int:batch_id>/<int:exam_record_id>/', views.courses_semesters, name='courses_semesters'),
+    path('courses-courses/<int:semester_id>/<int:batch_id>/', views.courses_record, name='courses_record'),
+    path('course-results/<int:semester_id>/<int:batch_id>/<int:course_id>/', views.course_results, name='course_results'),
+    path('transcript/program/', views.transcript_program_selection, name='Transcript_Program'),
+    path('transcript/batch/<int:program_id>/', views.transcript_batch, name='Transcript_Batch'),
+    path('transcript/students/<int:batch_id>/', views.transcript_student, name='Transcript_students'),
+    path('transcript/<int:student_id>/', views.student_transcript, name='student_transcript'),
 
 ]

@@ -1,0 +1,123 @@
+{% extends 'adminlte/base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>{{ student.first_name }} {{ student.last_name }}'s Transcript</h2>
+
+<!-- Include DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="{% static 'css/datatables.min.css' %}"/>
+
+<div class="d-flex justify-content-end mb-3">
+    <!-- Button to open the modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#semesterModal">
+        Select Semesters
+    </button>
+</div>
+
+<!-- Modal for selecting semesters -->
+<div class="modal fade" id="semesterModal" tabindex="-1" role="dialog" aria-labelledby="semesterModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="get" action="{% url 'records:student_transcript' student.student_id %}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="semesterModalLabel">Select Semesters</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <label for="semesters">Semesters:</label>
+                    <select id="semesters" name="include_semesters" multiple class="form-control">
+                        {% for semester_number in semester_records.keys %}
+                            <option value="{{ semester_number }}" {% if semester_number in request.GET.include_semesters %}selected{% endif %}>
+                                Semester {{ semester_number }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Hold down the Ctrl (Windows) or Command (Mac) button to select multiple options.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<table id="transcript-table" class="display" style="width:100%">
+    <thead>
+        <tr>
+            <th>Semester</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for semester_number, semester_data in semester_records.items %}
+            <tr>
+                <td>
+                    <!-- Nested table for the semester -->
+                    <table class="table table-bordered" style="width:100%; margin-bottom: 20px;">
+                        <thead>
+                            <tr>
+                                <th colspan="7">
+                                    Semester {{ semester_data.semesternumber }} - {{ semester_data.semester_category }} ({{ semester_data.exam_date|date:"Y" }})
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>Course Name</th>
+                                <th>Course Code</th>
+                                <th>Credit Hours</th>
+                                <th>Obtained Marks</th>
+                                <th>Total Marks</th>
+                                <th>Obtained GPA</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course_name, course_data in semester_data.courses.items %}
+                                <tr>
+                                    <td>{{ course_data.course_name }}</td>
+                                    <td>{{ course_data.course_code }}</td>
+                                    <td>{{ course_data.credit_hours }}</td>
+                                    <td>{{ course_data.obtained_marks }}</td>
+                                    <td>{{ course_data.total_marks }}</td>
+                                    <td>{{ course_data.gpa_per_course }}</td>
+                                    <td>{% if course_data.is_repeated == 'Yes' %}*{% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2"><strong>Total :</strong></td>
+                                <td>{{ semester_data.total_credit_hours }}</td>
+                                <td>{{ semester_data.total_obtained_marks }}</td>
+                                <td>{{ semester_data.total_semester_marks }}</td>
+                                <td>{{ semester_data.gpa_per_semester }}</td>
+                                <td><strong>CGPA:</strong>&nbsp;&nbsp;&nbsp;&nbsp;{{ semester_data.cgpa }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Include DataTables JS -->
+<script type="text/javascript" src="{% static 'js/datatables.min.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        $('#transcript-table').DataTable({
+            "paging": false,
+            "searching": false,
+            "info": false,
+            "order": [],
+            "dom": 'Bfrtip',
+            "buttons": [
+                'excelHtml5',
+                'print'
+            ]
+        });
+    });
+</script>
+{% endblock %}
