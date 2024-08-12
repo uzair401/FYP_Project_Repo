@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'ERMS_System.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'fresh_db',
+        'NAME': 'fresh',
         'USER': 'postgres',
         'PASSWORD': '@Uzair401',
         'HOST': 'localhost',  

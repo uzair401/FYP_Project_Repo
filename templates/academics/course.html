@@ -46,7 +46,9 @@
                             <td>{{ course.semester.program.department.department_name }}</td>
                             <td class="exclude">
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateCourseModal{{ course.course_id }}">Update</button>
+                                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCourseModal{{ course.course_id }}">Delete</button>
+                                {%endif%}
                             </td>
                         </tr>
 

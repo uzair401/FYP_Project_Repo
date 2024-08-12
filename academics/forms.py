@@ -13,9 +13,10 @@ class DepartmentForm(forms.ModelForm):
 
 class ProgramForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # Get the user from the passed arguments
         department_id = kwargs.pop('department_id', None)
         super().__init__(*args, **kwargs)
-        if department_id:
+        if department_id and not user.is_superuser:
             self.fields['department'].queryset = Department.objects.filter(department_id=department_id)
 
     class Meta:
@@ -31,13 +32,16 @@ class ProgramForm(forms.ModelForm):
 
 class SemesterForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         department_id = kwargs.pop('department_id', None)
         program_id = kwargs.pop('program_id', None)
         super().__init__(*args, **kwargs)
-        if department_id:
-            self.fields['program'].queryset = Program.objects.filter(department__department_id=department_id)
-        if program_id:
-            self.fields['program'].queryset = Program.objects.filter(program_id=program_id)
+        if user and not user.is_superuser:
+            if department_id:
+                self.fields['program'].queryset = Program.objects.filter(department__department_id=department_id)
+            elif program_id:
+                self.fields['program'].queryset = Program.objects.filter(program_id=program_id)
+
     class Meta:
         model = Semester
         fields = '__all__'
@@ -46,13 +50,14 @@ class SemesterForm(forms.ModelForm):
             'semester_category': forms.TextInput(attrs={'class': 'form-control'}),
             'program': forms.Select(attrs={'class': 'form-control'}),
         }
-
 class CourseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         department_id = kwargs.pop('department_id', None)
         super().__init__(*args, **kwargs)
-        if department_id:
-            self.fields['semester'].queryset = Semester.objects.filter(program__department__department_id=department_id)
+        if user and not user.is_superuser:
+            if department_id:
+                self.fields['semester'].queryset = Semester.objects.filter(program__department__department_id=department_id)
 
     class Meta:
         model = Course
@@ -71,10 +76,12 @@ class CourseForm(forms.ModelForm):
 
 class BatchForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         department_id = kwargs.pop('department_id', None)
         super().__init__(*args, **kwargs)
-        if department_id:
-            self.fields['program'].queryset = Program.objects.filter(department__department_id=department_id)
+        if user and not user.is_superuser:
+            if department_id:
+                self.fields['program'].queryset = Program.objects.filter(department__department_id=department_id)
 
     class Meta:
         model = Batch
@@ -84,19 +91,19 @@ class BatchForm(forms.ModelForm):
             'batch_year': forms.NumberInput(attrs={'class': 'form-control'}),
             'batch_number': forms.NumberInput(attrs={'class': 'form-control'}),
             'batch_session_start': forms.DateInput(
-                format='%Y-%m-%d',  
+                format='%Y-%m-%d',
                 attrs={
                     'class': 'form-control', 
                     'type': 'date', 
-                    'placeholder': 'YYYY-MM-DD'  # Placeholder with the desired format
+                    'placeholder': 'YYYY-MM-DD'
                 }
             ),
             'batch_session_end': forms.DateInput(
-                format='%Y-%m-%d',  
+                format='%Y-%m-%d',
                 attrs={
                     'class': 'form-control', 
                     'type': 'date', 
-                    'placeholder': 'YYYY-MM-DD'  # Placeholder with the desired format
+                    'placeholder': 'YYYY-MM-DD'
                 }
             ),
             'program': forms.Select(attrs={'class': 'form-control'}),

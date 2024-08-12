@@ -19,9 +19,11 @@ class StudentForm(forms.ModelForm):
             'batch': forms.Select(attrs={'class': 'form-control'}),
         }
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         department_id = kwargs.pop('department_id', None)
         super().__init__(*args, **kwargs)
-        if department_id:
-            self.fields['department'].queryset = Department.objects.filter(department_id=department_id)
-            self.fields['program'].queryset = Program.objects.filter(department_id=department_id)
-            self.fields['batch'].queryset = Batch.objects.filter(program__department__department_id=department_id)
+        if user and not user.is_superuser:
+            if department_id:
+                self.fields['department'].queryset = Department.objects.filter(department_id=department_id)
+                self.fields['program'].queryset = Program.objects.filter(department__department_id=department_id)
+                self.fields['batch'].queryset = Batch.objects.filter(program__department__department_id=department_id)

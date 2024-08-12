@@ -76,7 +76,7 @@ def department_delete(request, department_id):
 # Program Section 
 @login_required
 def program(request):
-    if request.user.role == 'Admin':
+    if request.user.role == 'Admin' and request.user.is_superuser:
         programs = Program.objects.all()
         form = ProgramForm()
         update_forms = {program.program_id: ProgramForm(instance=program) for program in programs}
@@ -84,9 +84,13 @@ def program(request):
     elif request.user.role in ['Faculty', 'Editor']:
         programs = Program.objects.filter(department_id=request.user.department.department_id)
         form = ProgramForm(department_id=request.user.department.department_id)
+        update_forms = {program.program_id: ProgramForm(instance=program, department_id=request.user.department.department_id) for program in programs}
+
     else:
         programs = Program.objects.none()
-    update_forms = {program.program_id: ProgramForm(instance=program, department_id=request.user.department.department_id) for program in programs}
+        form = ProgramForm()
+        update_forms = {}
+
     return render(request, 'academics/program.html', {
         'programs': programs,
         'form': form,
@@ -136,40 +140,25 @@ def program_delete(request, program_id):
         return JsonResponse({'success': True, 'message': f'Program {program.program_name} deleted successfully.'})
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
-# Semester Section
-@login_required
-def semester(request):
-    if request.user.role == 'Admin':
-        semesters = Semester.objects.all()
-        form = SemesterForm()
-    elif request.user.role in ['Faculty', 'Editor']:
-        # Filter based on the program's department ID
-        departments = Department.objects.filter(department_id=request.user.department.department_id)
-        programs = Program.objects.filter(department__in=departments)
-        semesters = Semester.objects.filter(program__in=programs)
-        form = SemesterForm(department_id=request.user.department.department_id)
-    else:
-        semesters = Semester.objects.none()
-    update_forms = {semester.semester_id: SemesterForm(instance=semester, department_id=request.user.department.department_id) for semester in semesters}
-
-    return render(request, 'academics/semester.html', {
-        'semesters': semesters,
-        'form': form,
-        'update_forms': update_forms,
-    })
+# 
 @login_required
 def semester_filtered(request, program_id):
-    if request.user.role == 'Admin':
+    if request.user.role == 'Admin' and request.user.is_superuser:
         semesters = Semester.objects.filter(program_id=program_id)
         form = SemesterForm(program_id=program_id)
+        update_forms = {semester.semester_id: SemesterForm(instance=semester) for semester in semesters}
+
     elif request.user.role in ['Faculty', 'Editor']:
         departments = Department.objects.filter(department_id=request.user.department.department_id)
         programs = Program.objects.filter(department__in=departments)
         semesters = Semester.objects.filter(program_id=program_id, program__in=programs)
         form = SemesterForm(department_id=request.user.department.department_id)
+        update_forms = {semester.semester_id: SemesterForm(instance=semester, department_id=request.user.department.department_id) for semester in semesters}
+
     else:
         semesters = Semester.objects.none()
-    update_forms = {semester.semester_id: SemesterForm(instance=semester, department_id=request.user.department.department_id) for semester in semesters}
+        form = SemesterForm()
+        update_forms = {}
 
     return render(request, 'academics/semester.html', {
         'semesters': semesters,
@@ -223,25 +212,30 @@ def semester_delete(request, semester_id):
 # Course Section 
 @login_required
 def course(request):
-    if request.user.role == 'Admin':
+    if request.user.role == 'Admin' and request.user.is_superuser:
         courses = Course.objects.all()
         form = CourseForm()
+        update_forms = {course.course_id: CourseForm(instance=course) for course in courses}
+
     elif request.user.role in ['Faculty', 'Editor']:
         # Filter based on the department ID
         departments = Department.objects.filter(department_id=request.user.department.department_id)
         programs = Program.objects.filter(department__in=departments)
-        courses = Course.objects.filter(semester__program__in=programs)
-        form = CourseForm(department_id=request.user.department.department_id)
+        semesters = Semester.objects.filter(program__in=programs)
+        courses = Course.objects.filter(semester__in=semesters)
+        form = CourseForm(user=request.user, department_id=request.user.department.department_id)
+        update_forms = {course.course_id: CourseForm(instance=course, user=request.user, department_id=request.user.department.department_id) for course in courses}
+
     else:
         courses = Course.objects.none()
-    update_forms = {course.course_id: CourseForm(instance=course,department_id=request.user.department.department_id) for course in courses}
+        form = CourseForm()
+        update_forms = {}
 
     return render(request, 'academics/course.html', {
         'courses': courses,
         'form': form,
         'update_forms': update_forms,
     })
-
 @csrf_exempt
 @login_required
 def add_course(request):
@@ -256,7 +250,6 @@ def add_course(request):
 
 @csrf_exempt
 @login_required
-@faculty_required
 def course_update(request, course_id):
     course = get_object_or_404(Course, course_id=course_id)
     
@@ -289,19 +282,23 @@ def course_delete(request, course_id):
 # Batch Section 
 @login_required
 def batch(request):
-    if request.user.role == 'Admin':
+    if request.user.role == 'Admin' and request.user.is_superuser:
         batches = Batch.objects.all()
         form = BatchForm()
+        update_forms = {batch.batch_id: BatchForm(instance=batch) for batch in batches}
+
     elif request.user.role in ['Faculty', 'Editor']:
         # Filter based on the department ID
         departments = Department.objects.filter(department_id=request.user.department.department_id)
         programs = Program.objects.filter(department__in=departments)
         batches = Batch.objects.filter(program__in=programs)
-        form = BatchForm(department_id=request.user.department.department_id)
+        form = BatchForm(user=request.user, department_id=request.user.department.department_id)
+        update_forms = {batch.batch_id: BatchForm(instance=batch, user=request.user, department_id=request.user.department.department_id) for batch in batches}
 
     else:
         batches = Batch.objects.none()
-    update_forms = {batch.batch_id: BatchForm(instance=batch,department_id=request.user.department.department_id) for batch in batches}
+        form = BatchForm()
+        update_forms = {}
 
     return render(request, 'academics/programs_batches.html', {
         'batches': batches,

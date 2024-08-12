@@ -11,25 +11,6 @@ def validate_gpa(value):
     if not (0 <= value <= 4.0):
         raise ValidationError('GPA must be between 0 and 4.0.')
 
-class ExamRecord(models.Model):
-    SESSION_CHOICES = [
-        ('Fall', 'Fall'),
-        ('Spring', 'Spring'),
-    ]
-    record_id = models.AutoField(primary_key=True)
-    record_name = models.CharField(max_length=255, unique=True)
-    record_year = models.IntegerField()
-    exam_date = models.DateField()
-    session = models.CharField(max_length=10, choices=SESSION_CHOICES) 
-    examiner = models.ForeignKey(User, on_delete=models.CASCADE)
-    program = models.ForeignKey('academics.Program', on_delete=models.CASCADE)
-    def save(self, *args, **kwargs):    
-        self.record_name = self.record_name.upper()
-        super(ExamRecord, self).save(*args, **kwargs)
-    class Meta:
-        unique_together = ('record_name', 'record_year', 'exam_date')  # Assuming this combination should be unique
-    def __str__(self):
-        return f"{self.record_name} ({self.session})"
 
 class ExamRecord(models.Model):
     SESSION_CHOICES = [

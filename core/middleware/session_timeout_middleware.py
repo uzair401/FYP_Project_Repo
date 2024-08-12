@@ -1,15 +1,21 @@
-# myapp/middleware.py
-from django.contrib.sessions.middleware import SessionMiddleware
-from django.http import HttpResponseRedirect
-from datetime import timedelta, datetime
+from django.utils.deprecation import MiddlewareMixin
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+from datetime import datetime, timedelta
 
-class SessionTimeoutMiddleware(SessionMiddleware):
+class SessionTimeoutMiddleware(MiddlewareMixin):
     def process_request(self, request):
         if request.user.is_authenticated:
-            if request.session.get('last_activity') is None:
-                request.session['last_activity'] = datetime.now().timestamp()
-            elif (datetime.fromtimestamp(request.session.get('last_activity')) + timedelta(minutes=10)) < datetime.now():
-                request.session.flush()
-                return HttpResponseRedirect('/login/')
-            request.session['last_activity'] = datetime.now().timestamp()
+            now = datetime.now()
+            last_activity = request.session.get('last_activity', now.timestamp())
+
+            if (datetime.fromtimestamp(last_activity) + timedelta(minutes=10)) < now:
+                # Session has timed out
+                print('Logout and Session Flush is initiated')
+                logout(request)  # Log out the user
+                request.session.flush()  # Clear the session
+                return redirect('/login/')  # Redirect to login page
+
+            # Update last activity time
+            request.session['last_activity'] = now.timestamp()
         return None
