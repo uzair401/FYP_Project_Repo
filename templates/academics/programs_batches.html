@@ -44,7 +44,7 @@
                             <td>{{ batch.program.department.department_name }}</td>
                             <td class="exclude">
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateBatchModal{{ batch.batch_id }}">Update</button>
-                                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
+                                {% if request.user.role == 'Admin' %}
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteBatchModal{{ batch.batch_id }}">Delete</button>
                                 {% endif%}
                             </td>

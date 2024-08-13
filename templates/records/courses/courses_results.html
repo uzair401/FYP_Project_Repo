@@ -30,9 +30,12 @@
                             <th>Student Name</th>
                             <th>Father Name</th>
                             <th>Registration Number</th>
-                            <th>Internal Marks</th>
-                            <th>Mid Marks</th>
-                            <th>Final Marks</th>
+                            <th>Internal Obtained</th>
+                            <th>Internal Total</th>
+                            <th>Mid Obtained</th>
+                            <th>Mid Total</th>
+                            <th>Final Obtained</th>
+                            <th>Final Total</th>
                             <th>Total Obtained Marks</th>
                             <th>Total Course Marks</th>
                             <th>Grade</th>
@@ -48,8 +51,11 @@
                             <td>{{ student_data.student.father_name }}</td>
                             <td>{{ student_data.student.registration_number }}</td>
                             <td>{{ student_data.internal_marks }}</td>
+                            <td>{{ student_data.total_internal_marks }}</td>
                             <td>{{ student_data.mid_marks }}</td>
+                            <td>{{ student_data.total_mid_marks }}</td>
                             <td>{{ student_data.final_marks }}</td>
+                            <td>{{ student_data.total_final_marks }}</td>
                             <td>{{ student_data.total_obtained_marks }}</td>
                             <td>{{ student_data.total_full_marks }}</td>
                             <td>{{ student_data.grade }}</td>

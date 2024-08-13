@@ -106,7 +106,7 @@
                             // Add header information before the table
                             if ($table.length === 1) {
                                 $(win.document.body).prepend(
-                                    '<table>' +
+                                    '<table style =" font-size: 12px; "> <ul>'  +
                                         '<tr>' +
                                             '<td><strong>Department:</strong></td>' +
                                             '<td><strong>{{ semester.program.department.department_name }}</strong></td>' +
@@ -131,7 +131,7 @@
                                             '<td><strong>Session:</strong></td>' +
                                             '<td><strong>{{ batch.batch_session_start }} &nbsp; &nbsp;{{ batch.batch_session_end }}</strong></td>' +
                                         '</tr>' +
-                                    '</table>'
+                                    '</table> </ul>'
                                 );
                             }
 
@@ -160,6 +160,7 @@
                                         '</tr>' +
                                     '</thead>'
                                 );
+                                
                             }
                         },
                         exportOptions: {
@@ -203,6 +204,7 @@
                 $('#message-container').empty();
             }, 2000);
         }
+        
     });
 </script>
 

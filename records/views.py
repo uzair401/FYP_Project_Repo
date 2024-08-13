@@ -502,6 +502,9 @@ def course_results(request, semester_id, batch_id, course_id):
                 final_marks = student_exam_record.final_marks
                 total_obtained_marks = student_exam_record.total_marks
                 total_full_marks = course.total_marks
+                total_internal_marks = course.internal_marks
+                total_mid_marks = course.mid_marks
+                total_final_marks = course.final_marks
                 percentage = (total_obtained_marks / total_full_marks) * 100 if total_full_marks > 0 else 0
                 gpa = student_exam_record.gpa_per_course
                 remarks = student_exam_record.remarks
@@ -514,6 +517,9 @@ def course_results(request, semester_id, batch_id, course_id):
                 'final_marks': final_marks,
                 'total_obtained_marks': total_obtained_marks,
                 'total_full_marks': total_full_marks,
+                'total_internal_marks': total_internal_marks,
+                'total_mid_marks': total_mid_marks,
+                'total_final_marks': total_final_marks,
                 'percentage': percentage,
                 'gpa': gpa,
                 'grade': grade,
