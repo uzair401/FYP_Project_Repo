@@ -82,131 +82,128 @@
 
 <script>
     $(document).ready(function() {
-        if (!$.fn.DataTable.isDataTable('#student-records-table')) {
-            $('#student-records-table').DataTable({
-                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f,B>>' +
-                     '<"row"<"col-sm-12"tr>>' +
-                     '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-                lengthMenu: [[50, 100], [50, 100]],
-                buttons: [
-                    'excel',
-                    {
-                        extend: 'print',
-                        className: 'btn btn-info float-right print-button',
-                        text: 'Print',
-                        customize: function(win) {
-                            // Remove existing headers or unwanted elements
-                            $(win.document.body).find('h1').remove();
-                            $(win.document.head).append('<style>@media print {.failed-mark { color: red !important; }}</style>');
+    if (!$.fn.DataTable.isDataTable('#student-records-table')) {
+    $('#student-records-table').DataTable({
+    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f,B>>' +
+    '<"row"<"col-sm-12"tr>>' +
+    '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+    lengthMenu: [[50, 100], [50, 100]],
+    buttons: [
+    'excel',
+    {
+    extend: 'print',
+    className: 'btn btn-info float-right print-button',
+    text: 'Print',
+    customize: function(win) {
+    // Remove existing headers or unwanted elements
+    $(win.document.body).find('h1').remove();
+    $(win.document.head).append('<style>@media print {.failed-mark { color: red !important; }}</style>');
+    
+    // Check if the table exists and has a <thead>
+    var $table = $(win.document.body).find('table');
+    var $thead = $table.find('thead');
+    
+    // Add header information before the table
+    if ($table.length === 1) {
+    $(win.document.body).prepend(
+    '<table style =" font-size: 12px; "> <ul>' +
+    '<tr>' +
+    '<td><strong>Department:</strong></td>' +
+    '<td><strong>{{ semester.program.department.department_name }}</strong></td>' +
+    '</tr>' +
+    '<tr>' +
+    '<td><strong>Program:</strong></td>' +
+    '<td><strong>{{ semester.program.program_name }}</strong></td>' +
+    '</tr>' +
+    '<tr>' +
+    '<td><strong>Semester:</strong></td>' +
+    '<td><strong>{{ semester.semester_number }} {{ semester.semester_category }}</strong></td>' +
+    '</tr>' +
+    '<tr>' +
+    '<td><strong>Batch:</strong></td>' +
+    '<td><strong>{{ batch.batch_name }}</strong></td>' +
+    '</tr>' +
+    '<tr>' +
+    '<td><strong>Exam Year:</strong></td>' +
+    '<td><strong>{{ exam_record.record_year }}</strong></td>' +
+    '</tr>' +
+    '<tr>' +
+    '<td><strong>Session:</strong></td>' +
+    '<td><strong>{{ batch.batch_session_start }} &nbsp; &nbsp;{{ batch.batch_session_end }}</strong></td>' +
+    '</tr>' +
+    '</table> </ul>'
+    );
+    }
+    
+    // Add the <thead> if it does not exist
+    if ($thead.length === 1) {
+    $table.prepend(
+    '<thead>' +
+    '<tr>' +
+    '<th rowspan="2"></th>' +
+    '<th rowspan="2"></th>' +
+    '<th rowspan="2"></th>' +
+    '{% for course in courses %}' +
+    '<th colspan="2" class="text-center">{{ course.course_name }}</th>' +
+    '{% endfor %}' +
+    '<th rowspan="2"></th>' +
+    '<th rowspan="2"></th>' +
+    '<th rowspan="2"></th>' +
+    '<th rowspan="2"></th>' +
+    '<th rowspan="2"></th>' +
+    '</tr>' +
+    '<tr>' +
 
-                            // Check if the table exists and has a <thead>
-                            var $table = $(win.document.body).find('table');
-                            var $thead = $table.find('thead');
-
-                            // Add header information before the table
-                            if ($table.length === 1) {
-                                $(win.document.body).prepend(
-                                    '<table style =" font-size: 12px; "> <ul>'  +
-                                        '<tr>' +
-                                            '<td><strong>Department:</strong></td>' +
-                                            '<td><strong>{{ semester.program.department.department_name }}</strong></td>' +
-                                        '</tr>' +
-                                        '<tr>' +
-                                            '<td><strong>Program:</strong></td>' +
-                                            '<td><strong>{{ semester.program.program_name }}</strong></td>' +
-                                        '</tr>' +
-                                        '<tr>' +
-                                            '<td><strong>Semester:</strong></td>' +
-                                            '<td><strong>{{ semester.semester_number }} {{ semester.semester_category }}</strong></td>' +
-                                        '</tr>' +
-                                        '<tr>' +
-                                            '<td><strong>Batch:</strong></td>' +
-                                            '<td><strong>{{ batch.batch_name }}</strong></td>' +
-                                        '</tr>' +
-                                        '<tr>' +
-                                            '<td><strong>Exam Year:</strong></td>' +
-                                            '<td><strong>{{ exam_record.record_year }}</strong></td>' +
-                                        '</tr>' +
-                                        '<tr>' +
-                                            '<td><strong>Session:</strong></td>' +
-                                            '<td><strong>{{ batch.batch_session_start }} &nbsp; &nbsp;{{ batch.batch_session_end }}</strong></td>' +
-                                        '</tr>' +
-                                    '</table> </ul>'
-                                );
-                            }
-
-                            // Add the <thead> if it does not exist
-                            if ($thead.length === 1) {
-                                $table.prepend(
-                                    '<thead>' +
-                                        '<tr>' +
-                                            '<th rowspan="2">Student Name</th>' +
-                                            '<th rowspan="2">Father Name</th>' +
-                                            '<th rowspan="2">Registration Number</th>' +
-                                            '{% for course in courses %}' +
-                                                '<th colspan="2" class="text-center">{{ course.course_name }}</th>' +
-                                            '{% endfor %}' +
-                                            '<th rowspan="2">Total Marks</th>' +
-                                            '<th rowspan="2">GPA</th>' +
-                                            '<th rowspan="2">Percentage</th>' +
-                                            '<th rowspan="2">CGPA</th>' +
-                                            '<th rowspan="2">Remarks</th>' +
-                                        '</tr>' +
-                                        '<tr>' +
-                                            '{% for course in courses %}' +
-                                                '<th>Marks</th>' +
-                                                '<th>GPA</th>' +
-                                            '{% endfor %}' +
-                                        '</tr>' +
-                                    '</thead>'
-                                );
-                                
-                            }
-                        },
-                        exportOptions: {
-                            columns: ':not(.exclude)',
-                            stripHtml: false,
-                            format: {
-                                body: function(data, column, row) {
-                                    if ($(row).find('td:eq(' + column + ')').hasClass('failed-mark')) {
-                                        return '<span style="color: red;">' + data + '</span>';
-                                    } else {
-                                        return data;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                ],
-                language: {
-                    lengthMenu: "Show _MENU_ entries",
-                    zeroRecords: "No records available",
-                    info: "Showing page _PAGE_ of _PAGES_",
-                    infoEmpty: "No records available",
-                    infoFiltered: "(filtered from _MAX_ total records)",
-                    search: "Search:",
-                    paginate: {
-                        first: "First",
-                        last: "Last",
-                        next: "Next",
-                        previous: "Previous"
-                    }
-                },
-                order: [[2, 'asc']]
-            });
-        }
-
-        var successMessage = localStorage.getItem('successMessage');
-        if (successMessage) {
-            $('#message-container').html('<div class="alert alert-success">' + successMessage + '</div>');
-            localStorage.removeItem('successMessage');
-            setTimeout(function() {
-                $('#message-container').empty();
-            }, 2000);
-        }
-        
+    '</thead>'
+    );
+    
+    }
+    },
+    exportOptions: {
+    columns: ':not(.exclude)',
+    stripHtml: false,
+    format: {
+    body: function(data, column, row) {
+    if ($(row).find('td:eq(' + column + ')').hasClass('failed-mark')) {
+    return '<span style="color: red;">' + data + '</span>';
+    } else {
+    return data;
+    }
+    }
+    }
+    }
+    }
+    ],
+    language: {
+    lengthMenu: "Show _MENU_ entries",
+    zeroRecords: "No records available",
+    info: "Showing page _PAGE_ of _PAGES_",
+    infoEmpty: "No records available",
+    infoFiltered: "(filtered from _MAX_ total records)",
+    search: "Search:",
+    paginate: {
+    first: "First",
+    last: "Last",
+    next: "Next",
+    previous: "Previous"
+    }
+    },
+    order: [[2, 'asc']]
     });
-</script>
+    }
+    
+    var successMessage = localStorage.getItem('successMessage');
+    if (successMessage) {
+    $('#message-container').html('<div class="alert alert-success">' + successMessage + '</div>');
+    localStorage.removeItem('successMessage');
+    setTimeout(function() {
+    $('#message-container').empty();
+    }, 2000);
+    }
+    
+    });
+    </script>
+    
 
 
 
