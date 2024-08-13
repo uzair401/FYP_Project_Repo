@@ -44,3 +44,4 @@ def assign_user_group(sender, instance, created, **kwargs):
             print(f"User saved with is_staff: {instance.is_staff} and is_superuser: {instance.is_superuser}")
         except Group.DoesNotExist:
             print(f"Group for role {instance.role} does not exist.")
+

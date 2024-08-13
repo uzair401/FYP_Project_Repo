@@ -24,6 +24,7 @@ class Command(BaseCommand):
                 'add_session', 'change_session', 'delete_session', 'view_session',
                 'add_enrollment', 'change_enrollment', 'delete_enrollment', 'view_enrollment',
                 'add_student', 'change_student', 'delete_student', 'view_student',
+                'add_enrollment', 'change_enrollment', 'delete_enrollment', 'view_enrollment',
             ],
             'Faculty': [
                 'add_batch', 'change_batch', 'view_batch',
@@ -39,6 +40,8 @@ class Command(BaseCommand):
                 'add_studentexamrecord', 'change_studentexamrecord', 'view_studentexamrecord',
                 'add_studentsemesterrecord', 'change_studentsemesterrecord', 'view_studentsemesterrecord',
                 'add_student', 'change_student', 'view_student',
+                'add_enrollment', 'change_enrollment', 'view_enrollment',
+                'add_examenrollment', 'change_examenrollment', 'view_examenrollment',
             ],
             'Editor': [
                 'add_batch', 'change_batch', 'view_batch',

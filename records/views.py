@@ -396,7 +396,7 @@ def semester_results(request, semester_id, batch_id, exam_record_id):
             context['students'].append(student_data)
         
         # Cache the context data for a specified period (e.g., 10 minutes)
-        cache.set(cache_key, context, timeout=20)  # Cache for 600 seconds (10 minutes)
+        cache.set(cache_key, context, timeout=10)
     
     return render(request, 'records/semester/semester_result.html', context)
 
@@ -520,7 +520,7 @@ def course_results(request, semester_id, batch_id, course_id):
                 'remarks': remarks,
             })
         
-        cache.set(cache_key, context, timeout=600)
+        cache.set(cache_key, context, timeout=10)
     
     return render(request, 'records/courses/courses_results.html', context)
 

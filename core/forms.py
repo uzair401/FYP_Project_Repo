@@ -30,6 +30,7 @@ class CustomUserCreationForm(UserCreationForm):
             self.fields['department'].initial = department_id
             self.fields['department'].queryset = Department.objects.filter(department_id=department_id)
             self.fields['department'].widget.attrs['readonly'] = True
+            
 
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
@@ -54,3 +55,6 @@ class CustomUserChangeForm(UserChangeForm):
             self.fields['department'].initial = department_id
             self.fields['department'].queryset = Department.objects.filter(department_id=department_id)
             self.fields['department'].widget.attrs['readonly'] = True
+        if 'password' in self.fields:
+            del self.fields['password']
+        self.fields['role'].help_text = '<span style=" color: #666;">For Change of password for this user, Visit admin panel</span>'

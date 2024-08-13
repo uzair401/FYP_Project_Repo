@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'core.middleware.session_timeout_middleware.SessionTimeoutMiddleware',
 ]
 AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
     'core.backends.EmailBackend',  # Replace 'myapp' with the actual name of your app
 ]
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
