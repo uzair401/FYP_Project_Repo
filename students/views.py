@@ -50,7 +50,6 @@ def add_student(request):
 
 @csrf_exempt
 @login_required
-@can_add_update
 def student_update(request, student_id):
     student = get_object_or_404(Student, student_id=student_id)
 

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from academics.models import Department  # Adjust import based on your project structure
+from academics.models import Department
 
 User = get_user_model()
 
@@ -22,10 +22,14 @@ class CustomUserCreationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         department_id = kwargs.pop('department_id', None)
         super().__init__(*args, **kwargs)
-        if department_id:
+        if self.instance and self.instance.role == 'Admin':
+            self.fields['department'].required = False
+            self.fields['department'].widget.attrs['readonly'] = True
+            self.fields['department'].initial = None
+        elif department_id:
             self.fields['department'].initial = department_id
             self.fields['department'].queryset = Department.objects.filter(department_id=department_id)
-            self.fields['department'].widget.attrs['readonly'] = True  # Make the department field read-only
+            self.fields['department'].widget.attrs['readonly'] = True
 
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
@@ -42,7 +46,11 @@ class CustomUserChangeForm(UserChangeForm):
     def __init__(self, *args, **kwargs):
         department_id = kwargs.pop('department_id', None)
         super().__init__(*args, **kwargs)
-        if department_id:
+        if self.instance and self.instance.role == 'Admin':
+            self.fields['department'].required = False
+            self.fields['department'].widget.attrs['readonly'] = True
+            self.fields['department'].initial = None
+        elif department_id:
             self.fields['department'].initial = department_id
             self.fields['department'].queryset = Department.objects.filter(department_id=department_id)
-            self.fields['department'].widget.attrs['readonly'] = True  # Make the department field read-only
+            self.fields['department'].widget.attrs['readonly'] = True

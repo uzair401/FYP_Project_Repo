@@ -3,6 +3,7 @@
 {% block content %}
 <div class="row">
     <!-- First Infobox -->
+    {% if request.user.role in 'Admin Faculty' %}
     <div class="col-12 col-sm-6 col-md-4">
         <div class="info-box clickable" onclick="location.href='{% url 'records:semester_record_dashboard' %}';">
             <span class="info-box-icon bg-info elevation-1 "><i class="fas fa-clipboard-check"></i></span>
@@ -14,7 +15,7 @@
             </div>
         </div>
     </div>
-
+    {%endif%}
     <!-- Second Infobox -->
     <div class="col-12 col-sm-6 col-md-4">
         <div class="info-box clickable" onclick="location.href='{% url 'records:courses_record_dashboard' %}';">
@@ -28,6 +29,7 @@
     </div>
 
     <!-- Third Infobox -->
+    {% if request.user.role in 'Admin Faculty' %}
     <div class="col-12 col-sm-6 col-md-4">
         <div class="info-box clickable" onclick="location.href='{% url 'records:Transcript_Program' %}';">
             <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-graduation-cap"></i></span>
@@ -38,6 +40,7 @@
             </div>
         </div>
     </div>
+    {%endif%}
 </div>
 {% endblock %}
 

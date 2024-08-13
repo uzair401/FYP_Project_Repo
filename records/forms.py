@@ -10,7 +10,7 @@ class ExamRecordForm(forms.ModelForm):
         model = ExamRecord
         fields = ['record_name', 'record_year', 'exam_date', 'session', 'examiner', 'program']
         widgets = {
-            'record_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'record_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Include Program Code e.g., BCS-FALL 2024, BBA- Spring 2024,'}),
             'record_year': forms.NumberInput(attrs={'class': 'form-control'}),
             'exam_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'session': forms.Select(choices=ExamRecord.SESSION_CHOICES, attrs={'class': 'form-control'}),
@@ -30,6 +30,7 @@ class ExamRecordForm(forms.ModelForm):
             elif user.role == 'Faculty':
                 self.fields['examiner'].queryset = User.objects.filter(department=user.department)
                 self.fields['program'].queryset = Program.objects.filter(department=user.department)
+        self.fields['record_name'].help_text = '<pclass="small mt-0 style="font-size: 11px;"><strong>Important! Include the Program Code Befor Exam Name to Avoid Confilcts. (BBA-FALL 2024, BCS-FALL 2024) etc</strong></p>'
 class StudentExamRecordForm(forms.ModelForm):
     class Meta:
         model = StudentExamRecord

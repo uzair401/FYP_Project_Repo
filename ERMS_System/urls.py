@@ -2,13 +2,13 @@ from core import views as core_views
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-
+from core.views import CustomLoginView
 
 LOGOUT_REDIRECT_URL = '/'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('login/', CustomLoginView.as_view(), name='login'),
     path('core/logout', auth_views.LogoutView.as_view(), name='logout'),
     path('', include('core.urls',namespace='core')),
     path('records/', include('records.urls',namespace='records')),

@@ -16,7 +16,7 @@ class ProgramForm(forms.ModelForm):
         user = kwargs.pop('user', None)  # Get the user from the passed arguments
         department_id = kwargs.pop('department_id', None)
         super().__init__(*args, **kwargs)
-        if department_id and not user.is_superuser:
+        if department_id and user and not user.is_superuser:
             self.fields['department'].queryset = Department.objects.filter(department_id=department_id)
 
     class Meta:
@@ -82,12 +82,13 @@ class BatchForm(forms.ModelForm):
         if user and not user.is_superuser:
             if department_id:
                 self.fields['program'].queryset = Program.objects.filter(department__department_id=department_id)
-
+        self.fields['batch_name'].widget = forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Include Program Code e.g., BCS-20T'})
+        self.fields['batch_name'].help_text = '<pclass="small mt-0 style="font-size: 11px;"><strong>Important! Include the Program Code Befor Batch Name to Avoid Confilcts. (BBA-20T, BCS-20T)</p>'
     class Meta:
         model = Batch
         fields = '__all__'
         widgets = {
-            'batch_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'batch_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Include Program Code e.g., BCS-20T'}),
             'batch_year': forms.NumberInput(attrs={'class': 'form-control'}),
             'batch_number': forms.NumberInput(attrs={'class': 'form-control'}),
             'batch_session_start': forms.DateInput(

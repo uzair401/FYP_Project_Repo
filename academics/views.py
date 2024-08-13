@@ -78,12 +78,12 @@ def department_delete(request, department_id):
 def program(request):
     if request.user.role == 'Admin' and request.user.is_superuser:
         programs = Program.objects.all()
-        form = ProgramForm()
+        form = ProgramForm(user=request.user)
         update_forms = {program.program_id: ProgramForm(instance=program) for program in programs}
 
     elif request.user.role in ['Faculty', 'Editor']:
         programs = Program.objects.filter(department_id=request.user.department.department_id)
-        form = ProgramForm(department_id=request.user.department.department_id)
+        form = ProgramForm(department_id=request.user.department.department_id, user=request.user)
         update_forms = {program.program_id: ProgramForm(instance=program, department_id=request.user.department.department_id) for program in programs}
 
     else:

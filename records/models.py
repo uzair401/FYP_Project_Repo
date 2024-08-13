@@ -22,7 +22,7 @@ class ExamRecord(models.Model):
     record_year = models.IntegerField()
     exam_date = models.DateField()
     session = models.CharField(max_length=10, choices=SESSION_CHOICES) 
-    examiner = models.ForeignKey(User, on_delete=models.CASCADE)
+    examiner = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=None)
     program = models.ForeignKey('academics.Program', on_delete=models.CASCADE)
     def save(self, *args, **kwargs):    
         self.record_name = self.record_name.upper()

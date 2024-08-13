@@ -46,35 +46,49 @@ def add_record(request):
         if form.is_valid():
             exam_record = form.save(commit=False)
 
-            # Define the timeframes for Spring and Fall sessions
-            spring_start_date = parse_date(f"{exam_record.record_year}-03-01")
-            spring_end_date = parse_date(f"{exam_record.record_year}-08-31")
-            fall_start_date = parse_date(f"{exam_record.record_year}-09-01")
-            fall_end_date = parse_date(f"{exam_record.record_year + 1}-02-28")  # Consider leap year for February end date
+            # Define the timeframes for Spring and Fall sessions based on exam_date
+            spring_start_date = parse_date(f"{exam_record.exam_date.year}-03-01")
+            spring_end_date = parse_date(f"{exam_record.exam_date.year}-08-31")
+            fall_start_date = parse_date(f"{exam_record.exam_date.year}-09-01")
+            fall_end_date = parse_date(f"{exam_record.exam_date.year + 1}-02-28")
 
-            # Check for existing records based on the session
+            # Print debugging information
+            print(f"Exam Date: {exam_record.exam_date}")
+            print(f"Spring Start: {spring_start_date}, Spring End: {spring_end_date}")
+            print(f"Fall Start: {fall_start_date}, Fall End: {fall_end_date}")
+            print(f"Program: {exam_record.program}")
+            print(f"Session: {exam_record.session}")
+
+            # Check for existing records based on the session, program, and exam_date within the semester period
             if exam_record.session == 'Spring':
                 existing_records = ExamRecord.objects.filter(
-                    exam_date__range=(spring_start_date, spring_end_date),
+                    exam_date__gte=spring_start_date,
+                    exam_date__lte=spring_end_date,
                     session='Spring',
-                    program=exam_record.program,
-                    record_year=exam_record.record_year
+                    program=exam_record.program
                 )
+                print(f"Existing Spring Records: {existing_records}")
             elif exam_record.session == 'Fall':
                 existing_records = ExamRecord.objects.filter(
-                    exam_date__range=(fall_start_date, fall_end_date),
+                    exam_date__gte=fall_start_date,
+                    exam_date__lte=fall_end_date,
                     session='Fall',
-                    program=exam_record.program,
-                    record_year=exam_record.record_year
+                    program=exam_record.program
                 )
+                print(f"Existing Fall Records: {existing_records}")
 
+            # If a record already exists within the same semester period and program, return an error
             if existing_records.exists():
-                return JsonResponse({'success': False, 'message': f'Exam record already exists for the {exam_record.session} session of this year within the specified timeframe.'})
+                return JsonResponse({
+                    'success': False, 
+                    'message': f'Exam record already exists for the {exam_record.session} session of this semester period for the program {exam_record.program}.'
+                })
 
             # Save the new exam record if no duplicates are found
             exam_record.save()
             return JsonResponse({'success': True, 'message': 'Exam record added successfully!'})
         else:
+            print(f"Form Errors: {form.errors}")
             return JsonResponse({'success': False, 'message': 'Error adding exam record: ' + str(form.errors)})
     else:
         return JsonResponse({'success': False, 'message': 'Invalid request method.'})
@@ -295,6 +309,7 @@ def semesters_rec_dash(request):
     })
 
 @login_required
+@faculty_required
 def records_batches(request, exam_record_id):
     if request.user.role == 'Admin':
         batches = ExamEnrollment.objects.filter(exam_record_id=exam_record_id)
@@ -311,6 +326,7 @@ def records_batches(request, exam_record_id):
     })
 
 @login_required
+@faculty_required
 def records_semester(request, batch_id, exam_record_id):
     semesters = ExamEnrollment.objects.filter(batch_id=batch_id, exam_record_id=exam_record_id)
     
@@ -319,6 +335,7 @@ def records_semester(request, batch_id, exam_record_id):
     })
 
 @login_required
+@faculty_required
 def semester_results(request, semester_id, batch_id, exam_record_id):
     # Generate a unique cache key
     cache_key = f"semester_results_{semester_id}_{batch_id}_{exam_record_id}"
@@ -386,6 +403,7 @@ def semester_results(request, semester_id, batch_id, exam_record_id):
 
 # Course results Section 
 @login_required
+
 def courses_rec_dash(request):
     if request.user.role == 'Admin':
         exam_records = ExamRecord.objects.all()
@@ -507,6 +525,7 @@ def course_results(request, semester_id, batch_id, course_id):
     return render(request, 'records/courses/courses_results.html', context)
 
 @login_required
+@faculty_required
 def transcript_program_selection(request):
     if request.user.role == 'Admin':
         programs = Program.objects.all()
@@ -520,6 +539,7 @@ def transcript_program_selection(request):
     })
 
 @login_required
+@faculty_required
 def transcript_batch(request, program_id):
     batches = Batch.objects.filter(program_id=program_id)
     return render(request, 'records/transcript/batches.html', {
@@ -527,6 +547,7 @@ def transcript_batch(request, program_id):
     })
 
 @login_required
+@faculty_required
 def transcript_student(request, batch_id):
     students = Student.objects.filter(batch_id=batch_id)
 

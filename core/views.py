@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
@@ -50,7 +51,8 @@ def user_create(request):
             except Exception as e:
                 return JsonResponse({'success': False, 'message': str(e)})
         else:
-            return JsonResponse({'success': False, 'message': form.errors})
+            error_messages = '\n'.join(['{}: {}'.format(field, ', '.join(errors)) for field, errors in form.errors.items()])
+            return JsonResponse({'success': False, 'message': error_messages})
     else:
         form = CustomUserCreationForm()
     return render(request, 'core/users.html', {'form': form})
@@ -73,7 +75,8 @@ def user_update(request, user_id):
             form.save()
             return JsonResponse({'success': True, 'message': f"User {user.username} was updated successfully."})
         else:
-            return JsonResponse({'success': False, 'message': form.errors})
+            error_messages = '\n'.join(['{}: {}'.format(field, ', '.join(errors)) for field, errors in form.errors.items()])
+            return JsonResponse({'success': False, 'message': error_messages})
     else:
         form = CustomUserChangeForm(instance=user)
     return render(request, 'core/users.html', {'form': form, 'user': user})
@@ -132,3 +135,9 @@ def error_404_view(request, exception=None):
 
 def error_500_view(request):
     return render(request, 'core/errors/500.html', status=500)
+
+class CustomLoginView(LoginView):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('core:main_dashboard')  # Redirect to home if already logged in
+        return super().dispatch(request, *args, **kwargs)
