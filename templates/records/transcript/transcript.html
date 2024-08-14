@@ -6,12 +6,16 @@
 
 <!-- Include DataTables CSS -->
 <link rel="stylesheet" type="text/css" href="{% static 'css/datatables.min.css' %}"/>
+<link rel="stylesheet" type="text/css" href="{% static 'css/buttons.dataTables.min.css' %}"/>
 
 <div class="d-flex justify-content-end mb-3">
     <!-- Button to open the modal -->
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#semesterModal">
         Select Semesters
     </button>
+    <!-- Button to open the modal -->
+    <!-- Button to download PDF -->
+    <a href="{% url 'records:student_transcript_pdf' student.student_id %}" class="btn btn-success ml-2">Download PDF</a>
 </div>
 
 <!-- Modal for selecting semesters -->
@@ -56,7 +60,7 @@
             <tr>
                 <td>
                     <!-- Nested table for the semester -->
-                    <table class="table table-bordered" style="width:100%; margin-bottom: 20px;">
+                    <table class="table table-bordered nested-table" style="width:100%; margin-bottom: 20px;">
                         <thead>
                             <tr>
                                 <th colspan="7">
@@ -103,8 +107,13 @@
     </tbody>
 </table>
 
-<!-- Include DataTables JS -->
+<!-- Include DataTables and Buttons JS -->
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/dataTables.buttons.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/buttons.html5.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/buttons.print.min.js' %}"></script>
+
 <script>
     $(document).ready(function() {
         $('#transcript-table').DataTable({
@@ -114,8 +123,35 @@
             "order": [],
             "dom": 'Bfrtip',
             "buttons": [
-                'excelHtml5',
-                'print'
+                {
+                    extend: 'print',
+                    text: 'Print',
+                    customize: function (win) {
+                        $(win.document.body).find('h1').remove();
+                        $(win.document.body).find('table').each(function () {
+                            var $table = $(this);
+                            var $nestedTables = $table.find('.nested-table');
+
+                            // Style nested tables for printing
+                            $nestedTables.each(function () {
+                                var $nestedTable = $(this);
+                                $nestedTable.css('margin-bottom', '10px');
+                                $nestedTable.find('thead').css('background-color', '#f2f2f2');
+                            });
+                        });
+
+                        $(win.document.body).prepend(
+                            '<h1>Transcript for {{ student.first_name }} {{ student.last_name }}</h1>' +
+                            '<p><strong>Department:</strong> {{ semester.program.department.department_name }}</p>' +
+                            '<p><strong>Program:</strong> {{ semester.program.program_name }}</p>' +
+                            '<p><strong>Student:</strong> {{ student.first_name }} {{ student.last_name }}</p>'
+                        );
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: 'Export to Excel'
+                }
             ]
         });
     });

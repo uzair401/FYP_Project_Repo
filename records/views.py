@@ -1,5 +1,13 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse, Http404
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from io import BytesIO
+from django.http import JsonResponse, Http404, HttpResponse
+from django.template.loader import render_to_string
 from collections import OrderedDict
 from django.contrib.auth.decorators import login_required
 from core.decorators import faculty_required
@@ -52,13 +60,6 @@ def add_record(request):
             fall_start_date = parse_date(f"{exam_record.exam_date.year}-09-01")
             fall_end_date = parse_date(f"{exam_record.exam_date.year + 1}-02-28")
 
-            # Print debugging information
-            print(f"Exam Date: {exam_record.exam_date}")
-            print(f"Spring Start: {spring_start_date}, Spring End: {spring_end_date}")
-            print(f"Fall Start: {fall_start_date}, Fall End: {fall_end_date}")
-            print(f"Program: {exam_record.program}")
-            print(f"Session: {exam_record.session}")
-
             # Check for existing records based on the session, program, and exam_date within the semester period
             if exam_record.session == 'Spring':
                 existing_records = ExamRecord.objects.filter(
@@ -67,7 +68,6 @@ def add_record(request):
                     session='Spring',
                     program=exam_record.program
                 )
-                print(f"Existing Spring Records: {existing_records}")
             elif exam_record.session == 'Fall':
                 existing_records = ExamRecord.objects.filter(
                     exam_date__gte=fall_start_date,
@@ -75,7 +75,6 @@ def add_record(request):
                     session='Fall',
                     program=exam_record.program
                 )
-                print(f"Existing Fall Records: {existing_records}")
 
             # If a record already exists within the same semester period and program, return an error
             if existing_records.exists():
@@ -88,10 +87,10 @@ def add_record(request):
             exam_record.save()
             return JsonResponse({'success': True, 'message': 'Exam record added successfully!'})
         else:
-            print(f"Form Errors: {form.errors}")
             return JsonResponse({'success': False, 'message': 'Error adding exam record: ' + str(form.errors)})
     else:
         return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
 
 @login_required
 def batches(request, exam_record_id):
@@ -630,3 +629,142 @@ def student_transcript(request, student_id):
     
     return render(request, 'records/transcript/transcript.html', context)
 
+
+
+
+def student_transcript_pdf(request, student_id):
+    # Retrieve the student record
+    student = get_object_or_404(Student, pk=student_id)
+    
+    # Retrieve the student's exam records
+    student_records = StudentExamRecord.objects.filter(student=student)
+    
+    # Retrieve the student's semester records
+    semester_records = StudentSemesterRecord.objects.filter(student=student)
+    
+    # Optionally get semesters to include from request
+    include_semesters = request.GET.getlist('include_semesters', [])
+    
+    # Prepare a dictionary for semester records with nested course data
+    semester_records_dict = {}
+    for semester_record in semester_records:
+        semester_number = semester_record.semester.semester_number
+        
+        # Check if this semester should be included
+        if include_semesters and str(semester_number) not in include_semesters:
+            continue
+        
+        # Initialize the dictionary for the semester if not already present
+        if semester_number not in semester_records_dict:
+            semester_records_dict[semester_number] = {
+                'semesternumber': semester_record.semester.semester_number,
+                'semester_category': semester_record.semester.semester_category,
+                'program': semester_record.exam_record.program.program_name,
+                'exam_date': semester_record.exam_record.exam_date,
+                'total_semester_marks': semester_record.total_semester_marks,
+                'total_obtained_marks': semester_record.semester_obtained_marks,
+                'gpa_per_semester': semester_record.gpa_per_semester,
+                'cgpa': semester_record.cgpa,
+                'courses': {},
+                'total_credit_hours': sum(
+                    record.course.credit_hours for record in student_records.filter(semester=semester_record.semester)
+                ),
+                'total_semester_marks': sum(
+                    record.course.total_marks for record in student_records.filter(semester=semester_record.semester)
+                ),
+                'has_failed_course': any(
+                    record.remarks and "Failed" in record.remarks for record in student_records.filter(semester=semester_record.semester)
+                )
+            }
+        
+        # Filter student records for the current semester
+        semester_courses = student_records.filter(semester=semester_record.semester)
+        
+        # Populate the course data for this semester
+        for record in semester_courses:
+            semester_records_dict[semester_number]['courses'][record.course.course_name] = {
+                'course_name': record.course.course_name,
+                'course_code': record.course.course_code,
+                'credit_hours': record.course.credit_hours,
+                'obtained_marks': record.total_marks,
+                'is_repeated': record.is_repeated,
+                'total_marks': record.course.total_marks,
+                'gpa_per_course': record.gpa_per_course,
+                'remarks': record.remarks,
+            }
+    
+    # Sort the semester_records_dict by semester number (keys)
+    sorted_semester_records = OrderedDict(sorted(semester_records_dict.items()))
+
+    # Create a PDF response
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    story = []
+
+    title_style = ParagraphStyle(name='Title', fontSize=14, alignment=1)
+    section_title_style = ParagraphStyle(name='SectionTitle', fontSize=12, alignment=1, spaceAfter=12)
+    table_header_style = TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Ensure grid lines are present
+        ('BACKGROUND', (0, 0), (-1, 0), colors.white),  # Header background color set to white
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),  # Data cells background color set to white
+    ])
+    table_data = []
+
+    story.append(Paragraph(f"Transcript for {student.first_name} {student.last_name}", title_style))
+    story.append(Paragraph(f"Department: {student.department.department_name}", styles['Normal']))
+    story.append(Paragraph(f"Program: {student.program.program_name}", styles['Normal']))
+    story.append(Paragraph(f"Student: {student.first_name} {student.last_name}", styles['Normal']))
+    story.append(Paragraph("<br/>", styles['Normal']))
+
+    for semester_number, semester_data in sorted_semester_records.items():
+        if table_data:
+            story.append(Table(table_data, style=table_header_style))
+            story.append(Paragraph("<br/>", styles['Normal']))
+            table_data = []
+
+        story.append(Paragraph(f"Semester {semester_data['semesternumber']} - {semester_data['semester_category']}", section_title_style))
+        story.append(Paragraph(f"Program: {semester_data['program']}", styles['Normal']))
+        story.append(Paragraph(f"Exam Date: {semester_data['exam_date']}", styles['Normal']))
+        story.append(Paragraph("<br/>", styles['Normal']))
+
+        # Prepare table data
+        table_data.append([
+            "Course Name", "Course Code", "Credit Hours", "Obtained Marks", "Total Marks", "GPA", "Remarks"
+        ])
+        
+        for course_data in semester_data['courses'].values():
+            table_data.append([
+                course_data['course_name'],
+                course_data['course_code'],
+                str(course_data['credit_hours']),
+                str(course_data['obtained_marks']),
+                str(course_data['total_marks']),
+                str(course_data['gpa_per_course']),
+                '*' if course_data['is_repeated'] == 'Yes' else ''
+            ])
+        
+        # Add summary for semester
+        table_data.append([
+            f"Total:",
+            "",
+            f"{semester_data['total_credit_hours']}",
+            f"{semester_data['total_obtained_marks']}",
+            f"{semester_data['total_semester_marks']}",
+            f"{semester_data['gpa_per_semester']}",
+            f"CGPA: {semester_data['cgpa']}"
+        ])
+
+    if table_data:
+        story.append(Table(table_data, style=table_header_style))
+
+    doc.build(story)
+
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{student.first_name}_{student.last_name}_transcript.pdf"'
+
+    return response

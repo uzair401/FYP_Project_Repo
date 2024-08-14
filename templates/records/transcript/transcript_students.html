@@ -19,11 +19,11 @@
                             <th>Father's Name</th>
                             <th>Date of Birth</th>
                             <th>Registration Number</th>
+                            <th>Batch</th>
                             <th>Enrollment Year</th>
                             <th>Status</th>
-                            <th>Department</th>
                             <th>Program</th>
-                            <th>Batch</th>
+                            <th>Department</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -34,11 +34,11 @@
                             <td>{{ student.father_name }}</td>
                             <td>{{ student.date_of_birth }}</td>
                             <td>{{ student.registration_number }}</td>
+                            <td>{{ student.batch.batch_name }}</td>
                             <td>{{ student.enrollment_year }}</td>
                             <td>{{ student.get_status_display }}</td>
-                            <td>{{ student.department.department_name }}</td>
                             <td>{{ student.program.program_name }}</td>
-                            <td>{{ student.batch.batch_name }}</td>
+                            <td>{{ student.department.department_name }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
