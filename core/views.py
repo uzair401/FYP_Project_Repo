@@ -5,13 +5,35 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from academics.models import Department
+from academics.models import Department, Program, Batch
 from django.contrib.auth import logout
 from .decorators import faculty_required
+from students.models import Student
 from django.views.decorators.csrf import csrf_exempt
 
 User = get_user_model()
 
+@login_required
+def dashboard(request):
+    if request.user.is_authenticated:
+        if request.user.role == 'Admin':
+            students_count = Student.objects.count()
+            batches = Batch.objects.count()
+            programs = Program.objects.all()
+        elif request.user.role == 'Faculty' or request.user.role == 'Editor':
+            students_count = Student.objects.filter(department_id=request.user.department.department_id).count()
+            batches = Batch.objects.filter(program__department=request.user.department).count()
+            programs = Program.objects.filter(department_id=request.user.department.department_id)
+        
+        context = {
+            'students': students_count,
+            'programs': programs,
+            'batches': batches
+        }
+        return render(request, 'core/dashboard.html', context)
+    else:
+        # Handle case where user is not authenticated, if needed
+        return redirect('login')  # or any other view you want to redirect to
 
 @faculty_required
 @login_required
@@ -106,9 +128,6 @@ def user_delete(request, user_id):
 
 @login_required
 
-def dashboard(request):
-    if request.user.is_authenticated:
-        return render(request, 'core/dashboard.html')
 
 @csrf_exempt
 def Logout(request):

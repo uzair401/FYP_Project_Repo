@@ -2,7 +2,25 @@
 {% load static %}
 
 {% block content %}
-<h2>{{ student.first_name }} {{ student.last_name }}'s Transcript</h2>
+<table>
+    <tr>
+        <td><strong>Name: </strong></td>
+        <td> <strong>{{ student.first_name }} {{ student.last_name }}</strong> </td>
+    </tr>
+    <tr>
+        <td><strong>Registration #: </strong></td>
+        <td><strong>{{ student.registration_number }}</strong></td>
+    </tr>
+    <tr>
+        <td><strong>Batch : </strong></td>
+        <td><strong>{{ student.batch.batch_name }}</strong></td>
+    </tr>
+    <tr>
+        <td><strong>Program : </strong></td>
+        <td><strong>{{ student.program.program_name }}</strong></td>
+    </tr>
+</table>
+
 
 <!-- Include DataTables CSS -->
 <link rel="stylesheet" type="text/css" href="{% static 'css/datatables.min.css' %}"/>
@@ -13,10 +31,12 @@
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#semesterModal">
         Select Semesters
     </button>
-    <!-- Button to open the modal -->
     <!-- Button to download PDF -->
-    <a href="{% url 'records:student_transcript_pdf' student.student_id %}" class="btn btn-success ml-2">Download PDF</a>
+    {% comment %} <a href="{% url 'records:transcript_pdf' student.student_id %}?include_semesters={{ request.GET.include_semesters|join:', ' }}" class="btn btn-success ml-2"> {% endcomment %}
+        Download PDF
+    </a>
 </div>
+
 
 <!-- Modal for selecting semesters -->
 <div class="modal fade" id="semesterModal" tabindex="-1" role="dialog" aria-labelledby="semesterModalLabel" aria-hidden="true">
@@ -50,11 +70,7 @@
 </div>
 
 <table id="transcript-table" class="display" style="width:100%">
-    <thead>
-        <tr>
-            <th>Semester</th>
-        </tr>
-    </thead>
+
     <tbody>
         {% for semester_number, semester_data in semester_records.items %}
             <tr>
