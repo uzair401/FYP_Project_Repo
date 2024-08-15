@@ -11,7 +11,7 @@ class ExamRecordForm(forms.ModelForm):
         fields = ['record_name', 'record_year', 'exam_date', 'session', 'examiner', 'program']
         widgets = {
             'record_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Include Program Code e.g., BCS-FALL 2024, BBA- Spring 2024,'}),
-            'record_year': forms.NumberInput(attrs={'class': 'form-control'}),
+            'record_year': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Provide Semester Year not Exam Year. eg 2021 for Fall 2021'}),
             'exam_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'session': forms.Select(choices=ExamRecord.SESSION_CHOICES, attrs={'class': 'form-control'}),
             'examiner': forms.Select(attrs={'class': 'form-control'}),

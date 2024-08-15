@@ -5,7 +5,7 @@ app_name = 'records'
 
 urlpatterns = [
     path('', views.exam_dashboard, name='Exam_dashboard'),
-    path('dash', views.dash, name="dash"),
+    path('dash', views.dash, name="results_dash"),
     path('add_record/', views.add_record, name='add_record'),
     path('batches/<int:exam_record_id>/', views.batches, name='batches'),
     path('update_batch/<int:id>/', views.update_batch, name="update_batch"),
