@@ -20,16 +20,16 @@ def dash(request):
 def exam_dashboard(request):
     if request.user.role == 'Admin':
         exam_records = ExamRecord.objects.all()
-        form = ExamRecordForm()  # Form without any filtering
+        form = ExamRecordForm() 
         update_forms = {record.record_id: ExamRecordForm(instance=record) for record in exam_records}
     elif request.user.role in ['Faculty','Editor']:
         department_id = request.user.department.department_id
         exam_records = ExamRecord.objects.filter(program__department_id=department_id)
-        form = ExamRecordForm(user=request.user, data=request.POST or None)  # Pass department_id to the form
+        form = ExamRecordForm(user=request.user, data=request.POST or None)  
         update_forms = {record.record_id: ExamRecordForm(instance=record, user=request.user) for record in exam_records}
     else:
         exam_records = ExamRecord.objects.none()
-        form = ExamRecordForm()  # Provide an empty form or restricted access form
+        form = ExamRecordForm() 
         update_forms = {}
 
     return render(request, 'records/dashboard.html', {
@@ -47,13 +47,15 @@ def add_record(request):
         if form.is_valid():
             exam_record = form.save(commit=False)
 
-            # Define the timeframes for Spring and Fall sessions based on exam_date
             spring_start_date = parse_date(f"{exam_record.exam_date.year}-03-01")
             spring_end_date = parse_date(f"{exam_record.exam_date.year}-08-31")
-            fall_start_date = parse_date(f"{exam_record.exam_date.year}-09-01")
-            fall_end_date = parse_date(f"{exam_record.exam_date.year + 1}-02-28")
+            if exam_record.exam_date.month in [1, 2]:  # January or February
+                fall_start_date = parse_date(f"{exam_record.exam_date.year-1}-09-01")
+                fall_end_date = parse_date(f"{exam_record.exam_date.year}-02-28")
+            else:  # September to December
+                fall_start_date = parse_date(f"{exam_record.exam_date.year}-09-01")
+                fall_end_date = parse_date(f"{exam_record.exam_date.year+1}-02-28")
 
-            # Check for existing records based on the session, program, and exam_date within the semester period
             if exam_record.session == 'Spring':
                 existing_records = ExamRecord.objects.filter(
                     exam_date__gte=spring_start_date,
@@ -69,14 +71,12 @@ def add_record(request):
                     program=exam_record.program
                 )
 
-            # If a record already exists within the same semester period and program, return an error
             if existing_records.exists():
                 return JsonResponse({
                     'success': False, 
                     'message': f'Exam record already exists for the {exam_record.session} session of this semester period for the program {exam_record.program}.'
                 })
 
-            # Save the new exam record if no duplicates are found
             exam_record.save()
             return JsonResponse({'success': True, 'message': 'Exam record added successfully!'})
         else:
@@ -130,11 +130,9 @@ def semesters(request, batch_id, exam_record_id):
 
 @login_required
 def courses(request, semester_id, batch_id):
-    # Retrieve the semester and batch based on the provided IDs
     semester = get_object_or_404(Semester, semester_id=semester_id)
     batch = get_object_or_404(Batch, batch_id=batch_id)
     
-    # Retrieve courses for the specified semester
     courses = Course.objects.filter(semester=semester)
     
     return render(request, 'records/courses.html', {
@@ -144,14 +142,11 @@ def courses(request, semester_id, batch_id):
     })
 @login_required
 def course_student_records(request, course_id, semester_id, batch_id):
-    # Retrieve the selected course
     course = get_object_or_404(Course, course_id=course_id)
     
-    # Retrieve the semester and batch
     semester = get_object_or_404(Semester, semester_id=semester_id)
     batch = get_object_or_404(Batch, batch_id=batch_id)
     
-    # Retrieve student exam records and semester records for the specified course, semester, and batch
     student_exam_records = StudentExamRecord.objects.filter(
         course_id=course_id, 
         semester_id=semester_id,
@@ -163,7 +158,6 @@ def course_student_records(request, course_id, semester_id, batch_id):
         student__batch=batch
     )
     
-    # Prepare data dictionary for template
     student_data = {}
     for exam_record in student_exam_records:
         student = exam_record.student
@@ -195,59 +189,48 @@ def update_student_record(request):
             course_id = int(request.POST.get('course_id'))
             semester_id = int(request.POST.get('semester_id'))
 
-            # Retrieve the relevant records
             exam_record = get_object_or_404(StudentExamRecord, student_id=student_id, course_id=course_id, semester_id=semester_id)
             course = get_object_or_404(Course, course_id=course_id)
 
-            # Validate marks before updating
             if helpers.validate_marks(internal_marks, mid_marks, final_marks, course.internal_marks, course.mid_marks, course.final_marks, course.total_marks):
                 total_marks_obtained = internal_marks + mid_marks + final_marks
                 exam_record.internal_marks = internal_marks
                 exam_record.mid_marks = mid_marks
                 exam_record.final_marks = final_marks
-                exam_record.total_marks = total_marks_obtained  # Store the actual obtained marks, not normalized
-                # Calculate GPA per course based on the actual obtained marks
+                exam_record.total_marks = total_marks_obtained  
                 gpa_per_course = helpers.calculate_grade_point(total_marks_obtained, course.total_marks)
                 exam_record.gpa_per_course = gpa_per_course
 
-                # Calculate grade based on the actual obtained marks
                 grade = helpers.calc_grade(total_marks_obtained, course.total_marks)
                 exam_record.grade = grade
 
-                # Check if passed or failed
                 pass_status = helpers.check_pass_status(total_marks_obtained, course.total_marks)
                 exam_record.remarks = 'Failed' if pass_status == 'Failed' else ''
                 exam_record.is_repeated = "Yes" if int(request.POST.get('is_repeated')) == 1 else "No"
 
                 exam_record.save()
-                # Calculate semester GPA
                 gpa_data = helpers.calculate_semester_gpa(student_id, semester_id)
 
-                # Get or create StudentSemesterRecord for the current student and semester
                 student_semester_record, created = StudentSemesterRecord.objects.get_or_create(
                     student_id=student_id, 
                     semester_id=semester_id,
-                    exam_record=exam_record.exam_record  # Ensure this matches the correct exam record
+                    exam_record=exam_record.exam_record  
                 )
 
-                # Update StudentSemesterRecord with the calculated values
                 student_semester_record.total_semester_marks = gpa_data['total_course_marks']
                 student_semester_record.semester_obtained_marks = gpa_data['total_obtained_marks']
                 student_semester_record.gpa_per_semester = gpa_data['semester_gpa']
                 student_semester_record.percentage = gpa_data['percentage']
 
-                # Check current semester status for failed courses
                 failed_courses = helpers.check_current_semester_status(student_id, semester_id)
                 
                 if failed_courses:
-                    # If there are failed courses, concatenate their course codes with comma separation
                     student_semester_record.remarks = ', '.join(failed_courses)
                 else:
                     student_semester_record.remarks = ''
 
                 student_semester_record.save()
 
-                # Calculate and update CGPA
                 cgpa = helpers.calculate_cgpa(student_id, semester_id)
                 student_semester_record.cgpa = cgpa
                 student_semester_record.save()
@@ -269,7 +252,6 @@ def reset_student_record(request):
 
         exam_record = get_object_or_404(StudentExamRecord, student_id=student_id, course_id=course_id, semester_id=semester_id)
 
-        # Reset marks to 0
         exam_record.internal_marks = 0
         exam_record.mid_marks = 0
         exam_record.final_marks = 0
@@ -329,25 +311,19 @@ def records_semester(request, batch_id, exam_record_id):
 @login_required
 @faculty_required
 def semester_results(request, semester_id, batch_id, exam_record_id):
-    # Generate a unique cache key
     cache_key = f"semester_results_{semester_id}_{batch_id}_{exam_record_id}"
     
-    # Check if the data is already cached
     context = cache.get(cache_key)
     
     if not context:
-        # Retrieve the semester, batch, and exam record
         semester = get_object_or_404(Semester, semester_id=semester_id)
         batch = get_object_or_404(Batch, batch_id=batch_id)
         exam_record = get_object_or_404(ExamRecord, record_id=exam_record_id)
         
-        # Retrieve the courses for the semester
         courses = Course.objects.filter(semester=semester)
         
-        # Retrieve students in the batch
         students = Student.objects.filter(batch=batch)
         
-        # Initialize context data
         context = {
             'semester': semester,
             'batch': batch,
@@ -357,18 +333,16 @@ def semester_results(request, semester_id, batch_id, exam_record_id):
         }
         
         for student in students:
-            # Retrieve exam and semester records for each student
             student_exam_records = StudentExamRecord.objects.filter(student=student, semester=semester, exam_record=exam_record)
             student_semester_record = get_object_or_404(StudentSemesterRecord, student=student, semester=semester)
 
-            # Prepare data for each student
             student_data = {
                 'student': student,
                 'courses': {course.course_id: {
                     'course': course,
                     'obtained_marks': 0,
                     'gpa_per_course': 0
-                } for course in courses},  # Initialize with default values
+                } for course in courses},  
                 'total_obtained_marks': 0,
                 'total_full_marks': 0,
                 'percentage': student_semester_record.percentage,
@@ -387,13 +361,11 @@ def semester_results(request, semester_id, batch_id, exam_record_id):
             
             context['students'].append(student_data)
         
-        # Cache the context data for a specified period (e.g., 10 minutes)
         cache.set(cache_key, context, timeout=10)
     
     return render(request, 'records/semester/semester_result.html', context)
 
 
-# Course results Section 
 @login_required
 
 def courses_rec_dash(request):
@@ -457,7 +429,6 @@ def course_results(request, semester_id, batch_id, course_id):
         batch = get_object_or_404(Batch, batch_id=batch_id)
         course = get_object_or_404(Course, course_id=course_id)
 
-        # Derive the exam record based on batch and semester
         exam_record = ExamRecord.objects.filter(
             examenrollment__batch=batch,
             examenrollment__semester=semester
@@ -554,28 +525,21 @@ def transcript_student(request, batch_id):
 
 
 def student_transcript(request, student_id):
-    # Retrieve the student record
     student = get_object_or_404(Student, pk=student_id)
     
-    # Retrieve the student's exam records
     student_records = StudentExamRecord.objects.filter(student=student)
     
-    # Retrieve the student's semester records
     semester_records = StudentSemesterRecord.objects.filter(student=student)
     
-    # Optionally get semesters to include from request
     include_semesters = request.GET.getlist('include_semesters', [])
     
-    # Prepare a dictionary for semester records with nested course data
     semester_records_dict = {}
     for semester_record in semester_records:
         semester_number = semester_record.semester.semester_number
         
-        # Check if this semester should be included
         if include_semesters and str(semester_number) not in include_semesters:
             continue
         
-        # Initialize the dictionary for the semester if not already present
         if semester_number not in semester_records_dict:
             semester_records_dict[semester_number] = {
                 'semesternumber': semester_record.semester.semester_number,
@@ -595,10 +559,8 @@ def student_transcript(request, student_id):
                 )
             }
         
-        # Filter student records for the current semester
         semester_courses = student_records.filter(semester=semester_record.semester)
         
-        # Populate the course data for this semester
         for record in semester_courses:
             semester_records_dict[semester_number]['courses'][record.course.course_name] = {
                 'course_name': record.course.course_name,
@@ -611,10 +573,8 @@ def student_transcript(request, student_id):
                 'remarks': record.remarks,
             }
     
-    # Sort the semester_records_dict by semester number (keys)
     sorted_semester_records = OrderedDict(sorted(semester_records_dict.items()))
 
-    # Create a context dictionary for the template
     context = {
         'student': student,
         'semester_records': sorted_semester_records

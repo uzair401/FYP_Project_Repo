@@ -3,7 +3,6 @@
 {% block content %}
 
 <div class="row">
-    <!-- Welcome Card -->
     <div class="col-md-12">
         <div class="card" style="
             background: rgb(113,0,0); /* Fallback for old browsers */
@@ -12,7 +11,6 @@
         ">
             <div class="card-body" style="color: white; font-weight: bold;">
                 <div class="row align-items-center">
-                    <!-- Text Column -->
                     <div class="col-md-8">
                         <h3 style="font-weight: 900;">Welcome {{ request.user.name }}</h3>
                         <h4 style="font-weight: 900;">
@@ -25,19 +23,16 @@
                         
                     </div>
                     
-                    <!-- Image Column -->
                     <div class="col-md-4 d-flex justify-content-center">
                         <img src="{% static 'admin-lte/images/awkumlogo.png' %}" class="img-fluid" alt="AWKUM" style="max-height: 100px; opacity: 0.7;">
                     </div>
                 </div>
             </div>
         </div>
-        <!-- /.card -->
     </div>
 </div>
 
 <div class="row">
-    <!-- Merged Results and Exams & Users Card -->
     <div class="col-md-9">
         <div class="card card-success">
             <div class="card-header">
@@ -45,13 +40,10 @@
                 <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
                 </div>
-                <!-- /.card-tools -->
             </div>
-            <!-- /.card-header -->
              
             <div class="card-body" style="display: block;">
                 <div class="row">
-                    <!-- Examinations Card -->
                     <div class="col-12">
                         <div class="info-box clickable" onclick="location.href='{% url 'records:Exam_dashboard' %}';">
                             <span class="info-box-icon bg-success elevation-1"><i class="fas fa-clipboard"></i></span>
@@ -63,7 +55,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Semester Results -->
                 {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
                 <div class="row">
                     <div class="col-12">
@@ -78,7 +69,6 @@
                     </div>
                 </div>
                 {% endif %}
-                <!-- Courses Results -->
                 <div class="row">
                     <div class="col-12">
                         <div class="info-box clickable" onclick="location.href='{% url 'records:courses_record_dashboard' %}';">
@@ -91,7 +81,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Generate Transcript -->
                 {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
                 <div class="row">
                     <div class="col-12">
@@ -106,7 +95,6 @@
                     </div>
                 </div>
                 {% endif %}
-                <!-- Users -->
                 {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
                 <div class="row">
                     <div class="col-12">
@@ -122,12 +110,10 @@
                 </div>
                 {% endif %}
             </div>
-            <!-- /.card-body -->
         </div>
-        <!-- /.card -->
+
     </div>
 
-    <!-- Sidebar with Small Boxes -->
     <div class="col-md-3">
         <div class="row">
             <div class="col-md-12">
@@ -184,7 +170,7 @@
                     </div>
                     <a href="{% url 'academics:Program_dashboard' %}">
                         <div class="icon">
-                            <i class="fas fa-book"></i> <!-- Change the icon as needed -->
+                            <i class="fas fa-book"></i> 
                         </div>
                     </a>
                 </div>
