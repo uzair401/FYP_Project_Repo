@@ -119,6 +119,7 @@
             <div class="col-md-12">
                 <div class="small-box bg-info">
                     <div class="inner">
+                        <a href="{% url 'students:Student_dashboard' %}" style="text-decoration: none; color: white;">
                         <h3>{{students}}</h3>
                         <p>Total Students <br> 
                             {% if request.user.role == 'Admin' %}
@@ -127,6 +128,7 @@
                                 in Department
                             {% endif %}
                         </p>
+                    </a>
                     </div>
                     <a href="{% url 'students:Student_dashboard' %}">
                         <div class="icon">
@@ -139,6 +141,7 @@
             <div class="col-md-12">
                 <div class="small-box bg-info">
                     <div class="inner">
+                    <a href="{% url 'academics:Batch_dashboard' %}"style="text-decoration: none; color: white;" >
                         <h3>{{batches}}</h3>
                         <p>Total Batches <br> 
                             {% if request.user.role == 'Admin' %}
@@ -147,6 +150,7 @@
                                 in Department
                             {% endif %}
                         </p>
+                    </a>
                     </div>
                     <a href="{% url 'academics:Batch_dashboard' %}">
                         <div class="icon">
@@ -159,6 +163,8 @@
             <div class="col-md-12">
                 <div class="small-box bg-info">
                     <div class="inner">
+                    <a href="{% url 'academics:Program_dashboard' %}"style="text-decoration: none; color: white;">
+
                         <h3>{{programs|length}}</h3>
                         <p>Programs <br> 
                             {% if request.user.role == 'Admin' %}
@@ -167,6 +173,7 @@
                                 in Department
                             {% endif %}
                         </p>
+                    </a>
                     </div>
                     <a href="{% url 'academics:Program_dashboard' %}">
                         <div class="icon">
