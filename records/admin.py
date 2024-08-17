@@ -53,14 +53,14 @@ class StudentExamRecordAdmin(admin.ModelAdmin):
 @admin.register(StudentSemesterRecord)
 class StudentSemesterRecordAdmin(admin.ModelAdmin):
     list_display = (
-        'student_exam_rec',
+        'student',
         'total_semester_marks',
         'semester_obtained_marks',
         'percentage',
         'gpa_per_semester',
         'cgpa',
         'remarks',
-        'student',
+        'student_exam_rec',
         'semester',
         'exam_record'
     )

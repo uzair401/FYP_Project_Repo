@@ -5,7 +5,6 @@ from academics.models import Department, Program, Semester, Course, Batch
 class Student(models.Model):
     STUDENT_STATUS_CHOICES = (
         ('Enrolled', 'Enrolled'),
-        ('Probation', 'Probation'),
         ('Semester Drop', 'Semester Drop'),
         ('Dropout', 'Dropout'),
         ('Pass Out', 'Pass Out'),
