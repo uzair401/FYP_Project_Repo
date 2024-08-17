@@ -127,8 +127,6 @@ def user_delete(request, user_id):
 
 
 @login_required
-
-
 @csrf_exempt
 def Logout(request):
     # Perform the logout operation
@@ -150,7 +148,7 @@ def error_403_view(request, exception=None):
     return render(request, 'core/errors/403.html', status=403)
 
 def error_404_view(request, exception=None):
-    return render(request, 'core\errors\404.html', status=404)
+    return render(request, 'core/errors/404.html', status=404)
 
 def error_500_view(request):
     return render(request, 'core/errors/500.html', status=500)

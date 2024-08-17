@@ -4,8 +4,6 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from core.views import CustomLoginView
 
-LOGOUT_REDIRECT_URL = '/'
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', CustomLoginView.as_view(), name='login'),
@@ -16,7 +14,7 @@ urlpatterns = [
     path('academics/', include('academics.urls', namespace='academics')),
 ]
 
-handler400 = core_views.error_400_view
-handler403 = core_views.error_403_view
-handler404 = core_views.error_404_view
-handler500 = core_views.error_500_view
+handler400 = 'core.views.error_400_view'
+handler403 = 'core.views.error_403_view'
+handler404 = 'core.views.error_404_view'
+handler500 = 'core.views.error_500_view'
