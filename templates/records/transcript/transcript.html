@@ -5,40 +5,37 @@
 <table>
     <tr>
         <td><strong>Name: </strong></td>
-        <td> <strong>{{ student.first_name }} {{ student.last_name }}</strong> </td>
+        <td></td>
+        <td> <strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ student.first_name }} {{ student.last_name }}</strong> </td>
     </tr>
     <tr>
-        <td><strong>Registration #: </strong></td>
-        <td><strong>{{ student.registration_number }}</strong></td>
+        <td><strong>Registration Number: </strong></td>
+        <td></td>
+        <td><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ student.registration_number }}</strong></td>
     </tr>
     <tr>
         <td><strong>Batch : </strong></td>
-        <td><strong>{{ student.batch.batch_name }}</strong></td>
+        <td></td>
+        <td><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ student.batch.batch_name }}</strong></td>
     </tr>
     <tr>
         <td><strong>Program : </strong></td>
-        <td><strong>{{ student.program.program_name }}</strong></td>
+        <td></td>
+        <td><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ student.program.program_name }}</strong></td>
     </tr>
 </table>
-
-
-<!-- Include DataTables CSS -->
-<link rel="stylesheet" type="text/css" href="{% static 'css/datatables.min.css' %}"/>
-<link rel="stylesheet" type="text/css" href="{% static 'css/buttons.dataTables.min.css' %}"/>
-
+<!-- Button for Selecting Semesters -->
 <div class="d-flex justify-content-end mb-3">
-    <!-- Button to open the modal -->
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#semesterModal">
         Select Semesters
     </button>
-    <!-- Button to download PDF -->
-    {% comment %} <a href="{% url 'records:transcript_pdf' student.student_id %}?include_semesters={{ request.GET.include_semesters|join:', ' }}" class="btn btn-success ml-2"> {% endcomment %}
-        Download PDF
-    </a>
+    <button type="button" class="btn btn-success ml-2" onclick="printPage('{{ student.first_name }} {{ student.last_name }}', '{{ student.registration_number }}', '{{ student.father_name }}', '{{ student.batch }}', '{{ student.department.department_name }}')">
+        Print Transcript
+    </button>
+    
 </div>
 
-
-<!-- Modal for selecting semesters -->
+<!-- Modal for Selecting Semesters -->
 <div class="modal fade" id="semesterModal" tabindex="-1" role="dialog" aria-labelledby="semesterModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -69,68 +66,73 @@
     </div>
 </div>
 
-<table id="transcript-table" class="display" style="width:100%">
-
-    <tbody>
-        {% for semester_number, semester_data in semester_records.items %}
-            <tr>
-                <td>
-                    <!-- Nested table for the semester -->
-                    <table class="table table-bordered nested-table" style="width:100%; margin-bottom: 20px;">
-                        <thead>
-                            <tr>
-                                <th colspan="7">
-                                    Semester {{ semester_data.semesternumber }} - {{ semester_data.semester_category }} ({{ semester_data.exam_date|date:"Y" }})
-                                </th>
-                            </tr>
-                            <tr>
-                                <th>Course Name</th>
-                                <th>Course Code</th>
-                                <th>Credit Hours</th>
-                                <th>Obtained Marks</th>
-                                <th>Total Marks</th>
-                                <th>Obtained GPA</th>
-                                <th>Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for course_name, course_data in semester_data.courses.items %}
+<!-- Transcript Table -->
+<div class="table-responsive">
+    <table id="transcript-table" class="display table" style="width:100%;">
+        <tbody>
+            {% for semester_number, semester_data in semester_records.items %}
+                <tr>
+                    <td colspan="8">
+                        <!-- Nested table for the semester -->
+                        <table class="table nested-table" style="width:100%; margin-bottom: 10px;">
+                            <thead>
                                 <tr>
-                                    <td>{{ course_data.course_name }}</td>
-                                    <td>{{ course_data.course_code }}</td>
-                                    <td>{{ course_data.credit_hours }}</td>
-                                    <td>{{ course_data.obtained_marks }}</td>
-                                    <td>{{ course_data.total_marks }}</td>
-                                    <td>{{ course_data.gpa_per_course }}</td>
-                                    <td>{% if course_data.is_repeated == 'Yes' %}*{% endif %}</td>
+                                    <th colspan="7" style="border: 1px solid black; ">
+                                        Semester {{ semester_data.semesternumber }} - {{ semester_data.semester_category }} 
+                                    </th>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="2"><strong>Total :</strong></td>
-                                <td>{{ semester_data.total_credit_hours }}</td>
-                                <td>{{ semester_data.total_obtained_marks }}</td>
-                                <td>{{ semester_data.total_semester_marks }}</td>
-                                <td>{{ semester_data.gpa_per_semester }}</td>
-                                <td><strong>CGPA:</strong>&nbsp;&nbsp;&nbsp;&nbsp;{{ semester_data.cgpa }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                                <tr>
+                                    <th style="border: 1px solid black;">Course Name</th>
+                                    <th style="border: 1px solid black;">Course Code</th>
+                                    <th style="border: 1px solid black;">Credit Hours</th>
+                                    <th style="border: 1px solid black;">Obtained Marks</th>
+                                    <th style="border: 1px solid black;">Total Marks</th>
+                                    <th style="border: 1px solid black;">Obtained GPA</th>
+                                    <th style="border: 1px solid black;">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for course_name, course_data in semester_data.courses.items %}
+                                    <tr>
+                                        <td style="border: 1px solid black;">{{ course_data.course_name }}</td>
+                                        <td style="border: 1px solid black;">{{ course_data.course_code }}</td>
+                                        <td style="border: 1px solid black;">{{ course_data.credit_hours }}</td>
+                                        <td style="border: 1px solid black;">{{ course_data.obtained_marks }}</td>
+                                        <td style="border: 1px solid black;">{{ course_data.total_marks }}</td>
+                                        <td style="border: 1px solid black;">{{ course_data.gpa_per_course }}</td>
+                                        <td style="border: 1px solid black;">{% if course_data.is_repeated == 'Yes' %}*{% endif %}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2" style="border: 1px solid black;"><strong>Total:</strong></td>
+                                    <td style="border: 1px solid black;">{{ semester_data.total_credit_hours }}</td>
+                                    <td style="border: 1px solid black;">{{ semester_data.total_obtained_marks }}</td>
+                                    <td style="border: 1px solid black;">{{ semester_data.total_semester_marks }}</td>
+                                    <td style="border: 1px solid black;">{{ semester_data.gpa_per_semester }}</td>
+                                    <td style="border: 1px solid black;"><strong>CGPA:</strong>&nbsp;&nbsp;&nbsp;&nbsp;{{ semester_data.cgpa }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-<!-- Include DataTables and Buttons JS -->
-<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/datatables.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/dataTables.buttons.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/buttons.html5.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/buttons.print.min.js' %}"></script>
-
+<!-- JavaScript for Print Functionality -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
 <script>
+    
+        var logoUrl = "{% static 'admin-lte/images/awkum-logo.png' %}";
+
+    
     $(document).ready(function() {
         $('#transcript-table').DataTable({
             "paging": false,
@@ -142,34 +144,121 @@
                 {
                     extend: 'print',
                     text: 'Print',
-                    customize: function (win) {
-                        $(win.document.body).find('h1').remove();
-                        $(win.document.body).find('table').each(function () {
-                            var $table = $(this);
-                            var $nestedTables = $table.find('.nested-table');
-
-                            // Style nested tables for printing
-                            $nestedTables.each(function () {
-                                var $nestedTable = $(this);
-                                $nestedTable.css('margin-bottom', '10px');
-                                $nestedTable.find('thead').css('background-color', '#f2f2f2');
-                            });
+                    title: 'Transcript for {{ student.first_name }} {{ student.last_name }}',
+                    customize: function(win) {
+                        $(win.document.body).find('table').addClass('table-bordered').css({
+                            'font-size': '12px',
+                            'border-collapse': 'collapse',
+                            'border': '1px solid black'
                         });
-
-                        $(win.document.body).prepend(
-                            '<h1>Transcript for {{ student.first_name }} {{ student.last_name }}</h1>' +
-                            '<p><strong>Department:</strong> {{ semester.program.department.department_name }}</p>' +
-                            '<p><strong>Program:</strong> {{ semester.program.program_name }}</p>' +
-                            '<p><strong>Student:</strong> {{ student.first_name }} {{ student.last_name }}</p>'
-                        );
+                        $(win.document.body).find('thead th').css({
+                            'border': '1px solid black'
+                        });
+                        $(win.document.body).find('tfoot td').css({
+                            'border': '1px solid black'
+                        });
+                        $(win.document.body).find('tbody td').css({
+                            'border': '1px solid black'
+                        });
                     }
-                },
-                {
-                    extend: 'excelHtml5',
-                    text: 'Export to Excel'
                 }
             ]
         });
     });
+
+    function printPage(studentName, registrationNumber, fatherName, batch, departmentName) {
+        const printWindow = window.open('', '', 'height=1000,width=800');
+        printWindow.document.write('<html><head><title>Print Transcript</title>');
+        
+        // CSS styles for printing
+        printWindow.document.write('<style>');
+        printWindow.document.write('@media print {');
+        printWindow.document.write('body { margin: 0; padding: 0; font-family: Arial, sans-serif; }');
+        printWindow.document.write('table { width: 100%; font-size: 7px; border-collapse: collapse; border: 1px solid black; margin: 0 auto; }');
+        printWindow.document.write('th, td { padding: 1px 2px; border: 1px solid black; text-align: left; }');
+        printWindow.document.write('thead th { border-top: 1px solid black; }');
+        printWindow.document.write('tfoot td { border-bottom: 1px solid black; }');
+        printWindow.document.write('tbody td { border-left: 1px solid black; border-right: 1px solid black; }');
+        
+        // Adjust column widths for narrower appearance
+// Adjust column widths for narrower appearance
+printWindow.document.write('thead th:nth-child(1), tbody td:nth-child(1) { width: 20%; }'); // Course Name
+printWindow.document.write('thead th:nth-child(2), tbody td:nth-child(2) { width: 12%; }'); // Course Code
+printWindow.document.write('thead th:nth-child(3), tbody td:nth-child(3) { width: 4%; }'); // Credit Hours
+printWindow.document.write('thead th:nth-child(4), tbody td:nth-child(4) { width: 7%; }'); // Obtained Marks (wider by 2%)
+printWindow.document.write('thead th:nth-child(5), tbody td:nth-child(5) { width: 7%; }'); // Total Marks (wider by 2%)
+printWindow.document.write('thead th:nth-child(6), tbody td:nth-child(6) { width: 7%; }'); // Obtained GPA (wider by 2%)
+printWindow.document.write('thead th:nth-child(7), tbody td:nth-child(7) { width: 16%; }'); // Remarks
+
+
+
+        
+        printWindow.document.write('html, body { height: 100%; }');
+        printWindow.document.write('body { page-break-inside: avoid; }');
+        printWindow.document.write('table { page-break-inside: auto; }');
+        printWindow.document.write('thead { display: table-header-group; }');
+        printWindow.document.write('tfoot { display: table-footer-group; }');
+        printWindow.document.write('tr { page-break-inside: avoid; page-break-after: auto; }');
+        printWindow.document.write('}');
+        printWindow.document.write('</style>');
+        
+        printWindow.document.write('</head><body>');
+        
+        // Header section with logo and university details
+        printWindow.document.write('<div style="text-align: center;">');
+        printWindow.document.write('<div style="display: flex; justify-content: space-between; align-items: center;">');
+        printWindow.document.write('<img src="' + logoUrl + '" alt="Logo" style="height: 50px;"/>');
+        printWindow.document.write('<div style="flex-grow: 1; text-align: center;">');
+        printWindow.document.write('<h2 style="margin: 0;">ABDUL WALI KHAN UNIVERSITY MARDAN</h2>');
+        printWindow.document.write('<h3 style="margin: 0;">' + departmentName + '</h3>');
+        printWindow.document.write('<h3 style="margin: 0;">Timergara Campus</h3>');
+        printWindow.document.write('<h3 style="margin: 0;"><strong>Transcript</strong></h3>');
+        printWindow.document.write('</div>');
+        printWindow.document.write('</div>');
+        printWindow.document.write('<div style="margin: 5px 0;"></div>');
+        
+        // Student information
+        printWindow.document.write('<div style="display: flex; justify-content: space-between; margin-top: 5px;">');
+        printWindow.document.write('<p style="margin: 0;">Student Name: ' + studentName + '</p>'); 
+        printWindow.document.write('<p style="margin: 0;">Registration Number:  ' + registrationNumber + '</p>');
+        printWindow.document.write('</div>');
+        printWindow.document.write('<div style="display: flex; justify-content: space-between; margin-top: 5px;">');
+        printWindow.document.write('<p style="margin: 0;">Father\'s Name: ' + fatherName + '</p>'); 
+        printWindow.document.write('<p style="margin: 0;">Batch: ' + batch + '</p>'); 
+        printWindow.document.write('</div>');
+        
+        // Write the table content
+        printWindow.document.write(document.getElementById('transcript-table').outerHTML);
+        
+        // Footer section
+printWindow.document.write('<div style="text-align: center; ">');
+    printWindow.document.write('<div style="display: flex; justify-content: space-between;">');
+    
+    // Footer container for left-aligned content
+    printWindow.document.write('<div style="text-align: left; width: 50%;">');
+    printWindow.document.write('<p style="margin: 0; font-size: 9px;">Error and omissions are subject to subsequent rectification</p>');
+    printWindow.document.write('<p style="margin: 0; font-size: 9px;">Results declaration date: ' + new Date().toLocaleDateString() + '</p>');
+    printWindow.document.write('</div>');
+    
+    // Footer line 2 on the right with extra space for a signature
+    printWindow.document.write('<div style="text-align: right; width: 50%;">');
+    printWindow.document.write('<p style="margin: 0; margin-top:50px; text-decoration: underline; padding-right: 100px;">Controller of Examinations</p>');
+    printWindow.document.write('</div>');
+    
+    printWindow.document.write('</div>');
+    printWindow.document.write('</div>');
+        
+        
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+    }
+    
+    
+
+    
+    
 </script>
+
 {% endblock %}

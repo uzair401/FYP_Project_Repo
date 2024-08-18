@@ -27,5 +27,4 @@ urlpatterns = [
     path('transcript/batch/<int:program_id>/', views.transcript_batch, name='Transcript_Batch'),
     path('transcript/students/<int:batch_id>/', views.transcript_student, name='Transcript_students'),
     path('transcript/<int:student_id>/', views.student_transcript, name='student_transcript'),
-    
 ]
