@@ -1,0 +1,82 @@
+{% extends "adminlte/base.html" %}
+{% load static %}
+{% load custome_filters %}
+{% block content %}
+<!-- Message Container -->
+<div id="message-container" class="alert-container"></div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><strong> Exam Enrollments Section </strong></h3>
+            </div>
+            <div class="card-body table-responsive">
+                <table id="exam-enrollments-table" class="table table-striped table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th>Batch</th>
+                            <th>Exam Record</th>
+                            {% if request.user.role == 'Admin' %}
+                            <th>Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in batches %}
+                        <tr>
+                            <td><a href="{% url 'records:courses_semesters' batch_id=enrollment.batch.batch_id exam_record_id=enrollment.exam_record.record_id %}">{{ enrollment.batch }}</a></td>
+                            <td>{{ enrollment.exam_record }}</td>
+                            {% if request.user.role == 'Admin' %}
+                            <td>
+                                <!-- No action button as update functionality is removed -->
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable
+        $('#exam-enrollments-table').DataTable({
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            lengthMenu: [[25, 50, 100], [25, 50, 100]],
+            language: {
+                lengthMenu: "Show _MENU_ entries",
+                zeroRecords: "No records available",
+                info: "Showing page _PAGE_ of _PAGES_",
+                infoEmpty: "No records available",
+                infoFiltered: "(filtered from _MAX_ total records)",
+                search: "Search:",
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
+            }
+        });
+
+        // Check if there is a success message in localStorage
+        var successMessage = localStorage.getItem('successMessage');
+        if (successMessage) {
+            $('#message-container').html('<div class="alert alert-success">' + successMessage + '</div>');
+            localStorage.removeItem('successMessage');
+            setTimeout(function() {
+                $('#message-container').empty();
+            }, 2000);
+        }
+    });
+</script>
+{% endblock %}

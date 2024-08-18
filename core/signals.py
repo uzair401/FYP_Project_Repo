@@ -9,7 +9,7 @@ def create_semesters(sender, instance, created, **kwargs):
     if created:
         for i in range(1, instance.number_of_semesters + 1):
             semester_category = 'Fall' if i % 2 == 1 else 'Spring'
-            semester, created = Semester.objects.get_or_create(
+            Semester.objects.get_or_create(
                 semester_number=i, 
                 semester_category=semester_category, 
                 program=instance
@@ -18,6 +18,7 @@ def create_semesters(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def assign_user_group(sender, instance, created, **kwargs):
     if created:
+        print("Signal executed")
         # Check and assign groups based on user role
         try:
             if instance.role == 'Admin':
@@ -25,15 +26,22 @@ def assign_user_group(sender, instance, created, **kwargs):
                 instance.groups.add(admin_group)
                 instance.is_staff = True
                 instance.is_superuser = True
+                print(f"Assigned Admin group, is_staff: {instance.is_staff}, is_superuser: {instance.is_superuser}")
             elif instance.role == 'Faculty':
                 faculty_group, created = Group.objects.get_or_create(name='Faculty')
                 instance.groups.add(faculty_group)
                 instance.is_staff = True
                 instance.is_superuser = False
+                print(f"Assigned Faculty group, is_staff: {instance.is_staff}, is_superuser: {instance.is_superuser}")
             elif instance.role == 'Editor':
                 editor_group, created = Group.objects.get_or_create(name='Editor')
                 instance.groups.add(editor_group)
                 instance.is_staff = False
                 instance.is_superuser = False
+                print(f"Assigned Editor group, is_staff: {instance.is_staff}, is_superuser: {instance.is_superuser}")
+            # Save the instance to commit changes
+            instance.save()
+            print(f"User saved with is_staff: {instance.is_staff} and is_superuser: {instance.is_superuser}")
         except Group.DoesNotExist:
             print(f"Group for role {instance.role} does not exist.")
+

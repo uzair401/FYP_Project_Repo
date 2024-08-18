@@ -4,7 +4,7 @@
 <html>
 <head>
     {% block title_outer %}
-        <title>{% block title %}{{ site.name }}{% endblock %}</title>
+        <title>{% block title %}AWKUM EMS{% endblock %}</title>
     {% endblock %}
 
     {% block meta %}
@@ -49,19 +49,9 @@
                                 <small>{% block page_description %}{% endblock %}</small>
                                 {% endblock %}
                             </h1>
-                            {% block breadcrumbs %}
-                                {% if breadcrumbs %}
-                                    <ol class="breadcrumb">
-                                        {% for crumb in breadcrumbs %}
-                                            {% if crumb.url %}
-                                                <li class=" breadcrumb-item"><a href="{{ crumb.url }}">{{ crumb.name }}</a></li>
-                                            {% else %}
-                                                <li class="breadcrumb-item active">{{ crumb.name }}</li>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </ol>
-                                {% endif %}
-                            {% endblock %}
+
+                                                
+
                         </div>
                     {% endblock no_heading %}
                 </section>
@@ -121,6 +111,5 @@
         margin-left: auto;
     }
 </style>
-
 </body>
 </html>

@@ -16,7 +16,6 @@
                 <table id="courses-table" class="table table-striped table-bordered mt-3">
                     <thead>
                         <tr>
-                            <th>S.No</th>
                             <th>Course Name</th>
                             <th>Course Code</th>
                             <th>Credit Hours</th>
@@ -33,7 +32,6 @@
                     <tbody>
                         {% for course in courses %}
                         <tr>
-                            <td>{{ forloop.counter }}</td>
                             <td>{{ course.course_name }}</td>
                             <td>{{ course.course_code }}</td>
                             <td>{{ course.credit_hours }}</td>
@@ -46,7 +44,9 @@
                             <td>{{ course.semester.program.department.department_name }}</td>
                             <td class="exclude">
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateCourseModal{{ course.course_id }}">Update</button>
+                                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCourseModal{{ course.course_id }}">Delete</button>
+                                {%endif%}
                             </td>
                         </tr>
 
@@ -138,6 +138,7 @@
                      extend: 'pdfHtml5',
                      className: 'btn btn-success float-right pdf-button',
                      text: 'PDF',
+                     title: '',
                      exportOptions: {
                          columns: ':not(.exclude)'
                      }
@@ -146,6 +147,7 @@
                      extend: 'excelHtml5',
                      className: 'btn btn-success excel-button',
                      text: 'Excel',
+                     title: '',
                      exportOptions: {
                          columns: ':not(.exclude)'
                      }
@@ -154,6 +156,7 @@
                      extend: 'print',
                      className: 'btn btn-info float-right print-button',
                      text: 'Print',
+                     title: '',
                      exportOptions: {
                          columns: ':not(.exclude)'
                      }
@@ -173,7 +176,8 @@
                     next: "Next",
                     previous: "Previous"
                 }
-            }
+            },
+            order: [[7, 'asc']]
         });
 
         // Check if there is a success message in localStorage

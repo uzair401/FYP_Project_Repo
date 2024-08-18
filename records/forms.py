@@ -1,7 +1,7 @@
 
 from django import forms
-from .models import ExamRecord, StudentExamRecord, StudentSemesterRecord
-from academics.models import Program, Course, Semester
+from .models import ExamRecord, StudentExamRecord, StudentSemesterRecord, ExamEnrollment
+from academics.models import Program, Course, Semester ,Batch
 from students.models import Student
 from core.models import User
 
@@ -10,8 +10,8 @@ class ExamRecordForm(forms.ModelForm):
         model = ExamRecord
         fields = ['record_name', 'record_year', 'exam_date', 'session', 'examiner', 'program']
         widgets = {
-            'record_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'record_year': forms.NumberInput(attrs={'class': 'form-control'}),
+            'record_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Include Program Code e.g., BCS-FALL 2024, BBA- Spring 2024,'}),
+            'record_year': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Provide Semester Year not Exam Year. eg 2021 for Fall 2021'}),
             'exam_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'session': forms.Select(choices=ExamRecord.SESSION_CHOICES, attrs={'class': 'form-control'}),
             'examiner': forms.Select(attrs={'class': 'form-control'}),
@@ -30,15 +30,15 @@ class ExamRecordForm(forms.ModelForm):
             elif user.role == 'Faculty':
                 self.fields['examiner'].queryset = User.objects.filter(department=user.department)
                 self.fields['program'].queryset = Program.objects.filter(department=user.department)
+        self.fields['record_name'].help_text = '<pclass="small mt-0 style="font-size: 11px;"><strong>Important! Include the Program Code Befor Exam Name to Avoid Confilcts. (BBA-FALL 2024, BCS-FALL 2024) etc</strong></p>'
 class StudentExamRecordForm(forms.ModelForm):
     class Meta:
         model = StudentExamRecord
-        fields = ['internal_marks', 'mid_marks', 'final_marks', 'percentage_per_course', 'gpa_per_course', 'remarks', 'exam_record', 'program', 'semester', 'course', 'student']
+        fields = ['internal_marks', 'mid_marks', 'final_marks',  'gpa_per_course', 'remarks', 'exam_record', 'program', 'semester', 'course', 'student']
         widgets = {
             'internal_marks': forms.NumberInput(attrs={'class': 'form-control'}),
             'mid_marks': forms.NumberInput(attrs={'class': 'form-control'}),
             'final_marks': forms.NumberInput(attrs={'class': 'form-control'}),
-            'percentage_per_course': forms.NumberInput(attrs={'class': 'form-control'}),
             'gpa_per_course': forms.NumberInput(attrs={'class': 'form-control'}),
             'remarks': forms.TextInput(attrs={'class': 'form-control'}),
             'exam_record': forms.Select(attrs={'class': 'form-control'}),
@@ -97,3 +97,29 @@ class StudentSemesterRecordForm(forms.ModelForm):
                 if program_id:
                     self.fields['semester'].queryset = Semester.objects.filter(program_id=program_id)
                     self.fields['exam_record'].queryset = ExamRecord.objects.filter(program_id=program_id)
+
+class ExamEnrollmentForm(forms.ModelForm):
+    class Meta:
+        model = ExamEnrollment
+        fields = ['exam_record', 'batch', 'semester']
+        widgets = {
+            'exam_record': forms.Select(attrs={'class': 'form-control'}),
+            'batch': forms.Select(attrs={'class': 'form-control'}),
+            'semester': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        if user:
+            if user.role == 'Admin':
+                self.fields['exam_record'].queryset = ExamRecord.objects.all()
+                self.fields['batch'].queryset = Batch.objects.all()
+                self.fields['semester'].queryset = Semester.objects.all()
+            elif user.role == 'Faculty':
+                self.fields['exam_record'].queryset = ExamRecord.objects.filter(program__in=user.department.programs.all())
+                self.fields['batch'].queryset = Batch.objects.filter(program__in=user.department.programs.all())
+                program_id = self.initial.get('program') or self.data.get('program')
+                if program_id:
+                    self.fields['semester'].queryset = Semester.objects.filter(program_id=program_id)

@@ -1,0 +1,220 @@
+{% extends "adminlte/base.html" %}
+{% load static %}
+{% load custome_filters %}
+{% block content %}
+
+<!-- Message Container -->
+<div id="message-container" class="alert-container"></div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><strong>Course: {{ course.course_name }}</strong></h3>
+            </div>
+            <div class="card-body table-responsive">
+                <table id="student-records-table" class="table table-striped table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Father Name</th>
+                            <th>Registration Number</th>
+                            <th>Course Name</th>
+                            <th>Internal Obtained</th>
+                            <th>Internal Total</th>
+                            <th>Mid Obtained</th>
+                            <th>Mid Total</th>
+                            <th>Final Obtained</th>
+                            <th>Final Total</th>
+                            <th>Obtained Marks</th>
+                            <th>Total Marks</th>
+                            <th>Grade</th>
+                            <th>GPA</th>
+                            <th>Remarks</th>
+                            <th>Repeated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student_id, data in student_data.items %}
+                        <tr>
+                            <td>{{ data.student.first_name }} {{ data.student.last_name }}</td>
+                            <td>{{ data.student.father_name }}</td>
+                            <td>{{ data.student.registration_number }}</td>
+                            <td>{{ data.course.course_name }}</td>
+                            <td><input type="text" class="form-control" value="{{ data.exam_record.internal_marks }}" name="internal_marks" /></td>
+                            <td>{{ data.course.internal_marks }}</td>
+                            <td><input type="text" class="form-control" value="{{ data.exam_record.mid_marks }}" name="mid_marks" /></td>
+                            <td>{{ data.course.mid_marks }}</td>
+                            <td><input type="text" class="form-control" value="{{ data.exam_record.final_marks }}" name="final_marks" /></td>
+                            <td>{{ data.course.final_marks }}</td>
+                            <td>{{ data.exam_record.total_marks }}</td>
+                            <td>{{ data.course.total_marks }}</td>
+                            <td>{{ data.exam_record.grade }}</td>
+                            <td>{{ data.exam_record.gpa_per_course }}</td>
+                            <td>{{ data.exam_record.remarks }}</td>
+                            <td>
+                                <select class="form-control is-repeated-select" 
+                                        data-student-id="{{ data.student.student_id }}" 
+                                        data-course-id="{{ data.course.course_id }}" 
+                                        data-semester-id="{{ data.semester_record.semester.semester_id }}">
+                                    <option value="Yes" {% if data.exam_record.is_repeated == "Yes" %}selected{% endif %}>Yes</option>
+                                    <option value="No" {% if data.exam_record.is_repeated == "No" %}selected{% endif %}>No</option>
+                                </select>
+                            </td>
+                            <td class="exclude">
+                                <button class="btn btn-primary btn-sm update-btn" data-student-id="{{ data.student.student_id }}" data-course-id="{{ data.course.course_id }}" data-semester-id="{{ data.semester_record.semester.semester_id }}">Update</button>
+                                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
+                                <button class="btn btn-danger btn-sm reset-btn" data-student-id="{{ data.student.student_id }}" data-course-id="{{ data.course.course_id }}" data-semester-id="{{ data.semester_record.semester.semester_id }}">Reset</button>
+                                {%endif%}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="15">No records available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#student-records-table').DataTable({
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            lengthMenu: [[50, 100], [50, 100]],
+            language: {
+                lengthMenu: "Show _MENU_ entries",
+                zeroRecords: "No records available",
+                info: "Showing page _PAGE_ of _PAGES_",
+                infoEmpty: "No records available",
+                infoFiltered: "(filtered from _MAX_ total records)",
+                search: "Search:",
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
+            },
+            order: [[2, 'asc']]
+        });
+
+        var successMessage = localStorage.getItem('successMessage');
+        if (successMessage) {
+            $('#message-container').html('<div class="alert alert-success">' + successMessage + '</div>');
+            localStorage.removeItem('successMessage');
+            setTimeout(function() {
+                $('#message-container').empty();
+            }, 2000);
+        }
+
+        // Update button click event
+        $('.update-btn').click(function() {
+            var row = $(this).closest('tr');
+            var studentId = $(this).data('student-id');
+            var internalMarks = row.find('input[name="internal_marks"]').val();
+            var midMarks = row.find('input[name="mid_marks"]').val();
+            var finalMarks = row.find('input[name="final_marks"]').val();
+            var courseId = $(this).data('course-id');
+            var semesterId = $(this).data('semester-id');
+            var isRepeated = row.find('.is-repeated-select').val();  // Get value from select
+
+            // Perform AJAX request to update the data
+            $.ajax({
+                type: 'POST',
+                url: '{% url "records:update_student_record" %}',
+                data: {
+                    student_id: studentId,
+                    internal_marks: internalMarks,
+                    mid_marks: midMarks,
+                    final_marks: finalMarks,
+                    course_id: courseId,
+                    semester_id: semesterId,
+                    is_repeated: isRepeated === 'Yes' ? '1' : '0',  // Convert to 0 or 1
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                    }
+                }
+            });
+        });
+
+        // Reset button click event
+        $('.reset-btn').click(function() {
+            var studentId = $(this).data('student-id');
+            var courseId = $(this).data('course-id');
+            var semesterId = $(this).data('semester-id');
+
+            // Perform AJAX request to reset the data
+            $.ajax({
+                type: 'POST',
+                url: '{% url "records:reset_student_record" %}',
+                data: {
+                    student_id: studentId,
+                    course_id: courseId,
+                    semester_id: semesterId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                    }
+                }
+            });
+        });
+
+        // Handle change event for the repeated select element
+        $('.is-repeated-select').change(function() {
+            var selectedValue = $(this).val();
+            var studentId = $(this).data('student-id');
+            var courseId = $(this).data('course-id');
+            var semesterId = $(this).data('semester-id');
+
+            // Perform AJAX request to update the data
+            $.ajax({
+                type: 'POST',
+                url: '{% url "records:update_student_record" %}',  // Make sure this URL matches your actual endpoint
+                data: {
+                    student_id: studentId,
+                    course_id: courseId,
+                    semester_id: semesterId,
+                    is_repeated: selectedValue === 'Yes' ? '1' : '0',  // Convert to 0 or 1
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        localStorage.setItem('successMessage', response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 500);
+                    } else {
+                        $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

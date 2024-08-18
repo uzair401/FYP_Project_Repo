@@ -18,12 +18,12 @@
                 <table id="batches-table" class="table table-striped table-bordered mt-3">
                     <thead>
                         <tr>
-                            <th>S.No</th>
                             <th>Batch Name</th>
                             <th>Batch year</th>
                             <th>Batch Number</th>
                             <th>Start Session</th>
                             <th>End Session</th>
+                            <th>Status</th>
                             <th>Program</th>
                             <th>Department</th>
                             <th class="exclude">Actions</th>
@@ -32,17 +32,17 @@
                     <tbody>
                         {% for batch in batches %}
                         <tr>
-                            <td>{{ forloop.counter }}</td>
                             <td>{{ batch.batch_name }}</td>
                             <td>{{ batch.batch_year }}</td>
                             <td>{{ batch.batch_number }}</td>
                             <td>{{ batch.batch_session_start }}</td>
                             <td>{{ batch.batch_session_end }}</td>
+                            <td>{{ batch.batch_status }}</td>
                             <td>{{ batch.program.program_name }}</td>
                             <td>{{ batch.program.department.department_name }}</td>
                             <td class="exclude">
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updateBatchModal{{ batch.batch_id }}">Update</button>
-                                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
+                                {% if request.user.role == 'Admin' %}
                                 <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteBatchModal{{ batch.batch_id }}">Delete</button>
                                 {% endif%}
                             </td>
@@ -173,7 +173,8 @@
                     next: "Next",
                     previous: "Previous"
                 }
-            }
+            },
+            order: [[1, 'asc']]
         });
 
         // Check if there is a success message in localStorage

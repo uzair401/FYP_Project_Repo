@@ -21,15 +21,15 @@
                             <th>Record Name</th>
                             <th>Record Year</th>
                             <th>Exam Date</th>
-                            <th>Session</th>
                             <th>Examiner</th>
+                            <th>Session</th>
                             <th>Program</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for record in exam_records %}
                         <tr>
-                            <td>{{ record.record_name }} </td>
+                            <td><a href="{% url 'records:batches' exam_record_id=record.record_id %}">{{ record.record_name }} </td>
                             <td>{{ record.record_year }}</td>
                             <td>{{ record.exam_date }}</td>
                             <td>{{ record.examiner }}</td>
@@ -90,7 +90,8 @@
                     next: "Next",
                     previous: "Previous"
                 }
-            }
+            },
+            order: [[1, 'asc']]
         });
 
         // Check if there is a success message in localStorage
@@ -100,7 +101,7 @@
             localStorage.removeItem('successMessage');
             setTimeout(function() {
                 $('#message-container').empty();
-            }, 2000);
+            }, 3000);
         }
 
         // Handle form submission via AJAX for Add Exam Record
@@ -122,14 +123,14 @@
                         $('#message-container').html('<div class="alert alert-danger">' + response.message + '</div>');
                         setTimeout(function() {
                             $('#message-container').empty();
-                        }, 2000);
+                        }, 3000);
                     }
                 },
                 error: function() {
                     $('#message-container').html('<div class="alert alert-danger">An error occurred while adding the exam record.</div>');
                     setTimeout(function() {
                         $('#message-container').empty();
-                    }, 2000);
+                    }, 3000);
                 }
             });
         });

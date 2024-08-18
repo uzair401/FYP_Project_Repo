@@ -15,7 +15,6 @@ urlpatterns = [
     path('add_program/', views.add_program, name='add_program'),
     path('program/<int:program_id>/update/', views.program_update, name='program_update'),
     path('program/<int:program_id>/delete/', views.program_delete, name='program_delete'),
-    path('semester/', views.semester, name= "Semester_dashboard"),
     path('semesters/<int:program_id>/', views.semester_filtered, name='semester_filtered'),
     path('add_semester/', views.add_semester, name='add_semester'),
     path('semester/<int:semester_id>/update/', views.semester_update, name='semester_update'),

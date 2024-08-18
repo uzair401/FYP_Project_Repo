@@ -2,13 +2,17 @@
 {% load i18n static %}
 
 {% block body_class %}login-page{% endblock %}
-
+{% if user.is_authenticated %}
+    <script>
+        window.location.href = "{% url 'core:main_dashboard' %}";
+    </script>
+{% endif %}
 {% block body %}
-    <div class="login-box">
+    <div class="login-box" style=" padding: 80px 5px 80px 5px;">
         {% block logo %}
         <div class="login-logo">
             {# Mirrors block names used in _main_header.html #}
-            <a href="{% block logo_href %}/{% endblock %}">{% block logo_text %}<b>Login To AWKUM  </b>EMS{% endblock %}</a>
+            <a href="{% block logo_href %}/{% endblock %}">{% block logo_text %}<h2>Login To AWKUM EMS </h2> {% endblock %}</a>
         </div>
         {% endblock %}
         <!-- /.login-logo -->
@@ -37,11 +41,11 @@
                         <p class="login-box-msg" style="color: red;">{{ message }}</p>
                     {% endif %}
                     <div class="form-group has-feedback">
-                        <input name="username" class="form-control" placeholder="{% trans 'Username' %}">
+                        <input name="username" class="form-control rounded" placeholder="{% trans 'Username' %}">
                         <span class="glyphicon glyphicon-user form-control-feedback"></span>
                     </div>
                     <div class="form-group has-feedback">
-                        <input type="password" name="password" class="form-control" placeholder="{% trans 'Password' %}">
+                        <input type="password" name="password" class="form-control rounded" placeholder="{% trans 'Password' %}">
                         <span class="glyphicon glyphicon-lock form-control-feedback"></span>
                     </div>
                     <div class="row">
@@ -49,8 +53,8 @@
                             {% block login_form_links %}
                             {% endblock %}
                         </div>
-                        <div class="col-xs-4 style="text-align: center">
-                            <button type="submit" class="btn btn-lg btn-primary btn-block btn-flat">{% trans 'Login' %}</button>
+                        <div class="col-xs-4 mx-auto" style="text-align: center">
+                            <button type="submit" class="btn btn-lg btn-primary btn-block btn-flat rounded">{% trans 'Login' %}</button>
                         </div>
                     </div>
                 </form>

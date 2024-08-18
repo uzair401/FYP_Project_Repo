@@ -1,0 +1,57 @@
+{% extends "adminlte/base.html" %}
+
+{% block title %}Error 404{% endblock %}
+
+{% block body %}
+    <div class="wrapper">
+        {% block nav_header %}
+            {% include 'adminlte/lib/_main_header.html' %}
+        {% endblock %}
+        
+        {% block nav_sidebar %}
+            {% include 'adminlte/lib/_main_sidebar.html' %}
+        {% endblock %}
+
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1>Error 404 - Incorrect URL</h1>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="{% url 'core:main_dashboard' %}">Home</a></li>
+                                <li class="breadcrumb-item active">404 Error Page</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div><!-- /.container-fluid -->
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="error-page">
+                    <h2 class="headline text-danger">404</h2>
+
+                    <div class="error-content">
+                        <h2><i class="fas fa-exclamation-triangle text-danger"></i> Oops! Page not found.</h2>
+
+                        <p>
+                            We could not find the page you were looking for. Return to  <a href="{% url 'core:main_dashboard' %}"> Dashboard </a></p>
+
+                    </div>
+                </div>
+                <!-- /.error-page -->
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+
+        {% block nav_footer %}
+            {% include 'adminlte/lib/_main_footer.html' %}
+        {% endblock %}
+    </div>
+    <!-- ./wrapper -->
+{% endblock %}

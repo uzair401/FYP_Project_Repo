@@ -46,13 +46,17 @@ class Course(models.Model):
         return self.course_name
 
 class Batch(models.Model):
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('passedout', 'Passed Out'),
+    ]
     batch_id = models.AutoField(primary_key=True)
     batch_name = models.CharField(max_length=100, unique=True)
     batch_year = models.IntegerField()
     batch_number = models.IntegerField()
     batch_session_start = models.DateField()  # Set a default value here
     batch_session_end = models.DateField()    # Set a default value here
-    batch_status = models.CharField(max_length=50, blank=True) 
+    batch_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active') 
     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='batches')
 
     def __str__(self):

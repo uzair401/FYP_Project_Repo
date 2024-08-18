@@ -1,0 +1,83 @@
+{% extends "adminlte/base.html" %}
+{% load static %}
+{% load custome_filters %}
+{% block content %}
+<!-- Message Container -->
+<div id="message-container" class="alert-container"></div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><strong> Exam Records Section </strong></h3>
+            </div>
+            <div class="card-body table-responsive">
+                <table id="exam-records-table" class="table table-striped table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th>Record Name</th>
+                            <th>Record Year</th>
+                            <th>Exam Date</th>
+                            <th>Examiner</th>
+                            <th>Session</th>
+                            <th>Program</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in exam_records %}
+                        <tr>
+                            <td><a href="{% url 'records:records_batches' exam_record_id=record.record_id %}">{{ record.record_name }}</a></td>
+                            <td>{{ record.record_year }}</td>
+                            <td>{{ record.exam_date }}</td>
+                            <td>{{ record.examiner }}</td>
+                            <td>{{ record.session }}</td>
+                            <td>{{ record.program.program_name }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable with search and pagination
+        $('#exam-records-table').DataTable({
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+            language: {
+                lengthMenu: "Show _MENU_ entries",
+                zeroRecords: "No records available",
+                info: "Showing page _PAGE_ of _PAGES_",
+                infoEmpty: "No records available",
+                infoFiltered: "(filtered from _MAX_ total records)",
+                search: "Search:",
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
+            },
+            order: [[1, 'asc']]
+        });
+
+        // Check if there is a success message in localStorage
+        var successMessage = localStorage.getItem('successMessage');
+        if (successMessage) {
+            $('#message-container').html('<div class="alert alert-success">' + successMessage + '</div>');
+            localStorage.removeItem('successMessage');
+            setTimeout(function() {
+                $('#message-container').empty();
+            }, 3000);
+        }
+    });
+</script>
+{% endblock %}

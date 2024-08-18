@@ -1,4 +1,190 @@
 {% extends "adminlte/base.html" %}
+{% load static %}
 {% block content %}
-<h1>Dashboard</h1>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card" style="
+            background: rgb(113,0,0); /* Fallback for old browsers */
+            background: linear-gradient(90deg, rgba(113,0,0,1) 32%, rgba(113,0,0,1) 100%);
+            color: white; /* Ensure text color is white */
+        ">
+            <div class="card-body" style="color: white; font-weight: bold;">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h3 style="font-weight: 900;">Welcome {{ request.user.name }}</h3>
+                        <h4 style="font-weight: 900;">
+                            {% if request.user.role == 'Admin' %}
+                                (Logged in as Admin)
+                            {% elif request.user.role in 'Faculty,Editor' %}
+                                {{ request.user.department }}
+                            {% endif %}
+                        </h4>
+                        
+                    </div>
+                    
+                    <div class="col-md-4 d-flex justify-content-center">
+                        <img src="{% static 'admin-lte\images\awkumlogo.png' %}" class="img-fluid" alt="AWKUM" style="max-height: 100px; opacity: 0.7;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-9">
+        <div class="card card-success">
+            <div class="card-header">
+                <h3 class="card-title">Examinations & Results and Users</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                </div>
+            </div>
+             
+            <div class="card-body" style="display: block;">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="info-box clickable" onclick="location.href='{% url 'records:Exam_dashboard' %}';">
+                            <span class="info-box-icon bg-success elevation-1"><i class="fas fa-clipboard"></i></span>
+                            <div class="info-box-content">
+                                <a href="{% url 'records:Exam_dashboard' %}" style="text-decoration: none; color: inherit;">
+                                    <span class="info-box-text"><h4>Examinations</h4></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="info-box clickable" onclick="location.href='{% url 'records:semester_record_dashboard' %}';">
+                            <span class="info-box-icon bg-info elevation-1"><i class="fas fa-clipboard-check"></i></span>
+                            <div class="info-box-content">
+                                <a href="{% url 'records:semester_record_dashboard' %}" style="text-decoration: none; color: inherit;">
+                                    <span class="info-box-text"><h4>Semester Results</h4></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="info-box clickable" onclick="location.href='{% url 'records:courses_record_dashboard' %}';">
+                            <span class="info-box-icon bg-success elevation-1"><i class="fas fa-chalkboard-teacher"></i></span>
+                            <div class="info-box-content">
+                                <a href="{% url 'records:courses_record_dashboard' %}" style="text-decoration: none; color: inherit;">
+                                    <span class="info-box-text"><h4>Courses Results</h4></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="info-box clickable" onclick="location.href='{% url 'records:Transcript_Program' %}';">
+                            <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-graduation-cap"></i></span>
+                            <div class="info-box-content">
+                                <a href="{% url 'records:Transcript_Program' %}" style="text-decoration: none; color: inherit;">
+                                    <span class="info-box-text"><h4>Generate Transcript</h4></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="info-box clickable" onclick="location.href='{% url 'core:users_dashboard' %}';">
+                            <span class="info-box-icon bg-info elevation-1"><i class="fas fa-user-cog"></i></span>
+                            <div class="info-box-content">
+                                <a href="{% url 'core:users_dashboard' %}" style="text-decoration: none; color: inherit;">
+                                    <span class="info-box-text"><h4>Users</h4></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <a href="{% url 'students:Student_dashboard' %}" style="text-decoration: none; color: white;">
+                        <h3>{{students}}</h3>
+                        <p>Total Students <br> 
+                            {% if request.user.role == 'Admin' %}
+                                in University
+                            {% elif request.user.role == 'Faculty' or request.user.role == 'Editor'  %}
+                                in Department
+                            {% endif %}
+                        </p>
+                    </a>
+                    </div>
+                    <a href="{% url 'students:Student_dashboard' %}">
+                        <div class="icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                    <a href="{% url 'academics:Batch_dashboard' %}"style="text-decoration: none; color: white;" >
+                        <h3>{{batches}}</h3>
+                        <p>Total Batches <br> 
+                            {% if request.user.role == 'Admin' %}
+                                in University
+                            {% elif request.user.role == 'Faculty' or request.user.role == 'Editor' %}
+                                in Department
+                            {% endif %}
+                        </p>
+                    </a>
+                    </div>
+                    <a href="{% url 'academics:Batch_dashboard' %}">
+                        <div class="icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {% if request.user.role == 'Admin' or request.user.role == 'Faculty' %}
+            <div class="col-md-12">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                    <a href="{% url 'academics:Program_dashboard' %}"style="text-decoration: none; color: white;">
+
+                        <h3>{{programs|length}}</h3>
+                        <p>Programs <br> 
+                            {% if request.user.role == 'Admin' %}
+                                in University
+                            {% elif request.user.role == 'Faculty' %}
+                                in Department
+                            {% endif %}
+                        </p>
+                    </a>
+                    </div>
+                    <a href="{% url 'academics:Program_dashboard' %}">
+                        <div class="icon">
+                            <i class="fas fa-book"></i> 
+                        </div>
+                    </a>
+                </div>
+            </div>
+            {%endif%}
+        </div>
+    </div>
+</div>
+
 {% endblock %}

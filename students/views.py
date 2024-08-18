@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
@@ -9,21 +10,24 @@ from core.decorators import faculty_required
 @login_required
 def student(request):
     # Retrieve the user role and department ID if available
-    user_department_id = request.user.department.department_id if hasattr(request.user, 'department') else None
+    user_department = getattr(request.user, 'department', None)
+    user_department_id = user_department.department_id if user_department else None
 
     # Filter students based on user role and department
-    if request.user.role == 'Admin':
+    if request.user.role == 'Admin' and request.user.is_superuser:
         students = Student.objects.all()
         form = StudentForm()
+        update_forms = {student.student_id: StudentForm(instance=student) for student in students}
     elif request.user.role in ['Faculty', 'Editor']:
         students = Student.objects.filter(department_id=user_department_id)
-        form = StudentForm(department_id=request.user.department.department_id)
+        form = StudentForm(user=request.user, department_id=user_department_id)
+        update_forms = {student.student_id: StudentForm(instance=student, user=request.user, department_id=user_department_id) for student in students}
     else:
         students = Student.objects.none()
-    update_forms = {
-    student.student_id: StudentForm(instance=student, department_id=request.user.department.department_id)
-    for student in students
-}   # Context to pass to the template
+        form = StudentForm()
+        update_forms = {}
+
+    # Context to pass to the template
     context = {
         'students': students,
         'form': form,
@@ -31,7 +35,6 @@ def student(request):
     }
 
     return render(request, 'students/students.html', context)
-
 @csrf_exempt
 @login_required
 @can_add_update
@@ -47,7 +50,6 @@ def add_student(request):
 
 @csrf_exempt
 @login_required
-@can_add_update
 def student_update(request, student_id):
     student = get_object_or_404(Student, student_id=student_id)
 

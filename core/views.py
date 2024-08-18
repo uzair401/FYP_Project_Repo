@@ -1,15 +1,39 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from academics.models import Department
+from academics.models import Department, Program, Batch
 from django.contrib.auth import logout
 from .decorators import faculty_required
+from students.models import Student
+from django.views.decorators.csrf import csrf_exempt
 
 User = get_user_model()
 
+@login_required
+def dashboard(request):
+    if request.user.is_authenticated:
+        if request.user.role == 'Admin':
+            students_count = Student.objects.count()
+            batches = Batch.objects.count()
+            programs = Program.objects.all()
+        elif request.user.role == 'Faculty' or request.user.role == 'Editor':
+            students_count = Student.objects.filter(department_id=request.user.department.department_id).count()
+            batches = Batch.objects.filter(program__department=request.user.department).count()
+            programs = Program.objects.filter(department_id=request.user.department.department_id)
+        
+        context = {
+            'students': students_count,
+            'programs': programs,
+            'batches': batches
+        }
+        return render(request, 'core/dashboard.html', context)
+    else:
+        # Handle case where user is not authenticated, if needed
+        return redirect('login')  # or any other view you want to redirect to
 
 @faculty_required
 @login_required
@@ -49,7 +73,8 @@ def user_create(request):
             except Exception as e:
                 return JsonResponse({'success': False, 'message': str(e)})
         else:
-            return JsonResponse({'success': False, 'message': form.errors})
+            error_messages = '\n'.join(['{}: {}'.format(field, ', '.join(errors)) for field, errors in form.errors.items()])
+            return JsonResponse({'success': False, 'message': error_messages})
     else:
         form = CustomUserCreationForm()
     return render(request, 'core/users.html', {'form': form})
@@ -72,7 +97,8 @@ def user_update(request, user_id):
             form.save()
             return JsonResponse({'success': True, 'message': f"User {user.username} was updated successfully."})
         else:
-            return JsonResponse({'success': False, 'message': form.errors})
+            error_messages = '\n'.join(['{}: {}'.format(field, ', '.join(errors)) for field, errors in form.errors.items()])
+            return JsonResponse({'success': False, 'message': error_messages})
     else:
         form = CustomUserChangeForm(instance=user)
     return render(request, 'core/users.html', {'form': form, 'user': user})
@@ -101,10 +127,34 @@ def user_delete(request, user_id):
 
 
 @login_required
-def dashboard(request):
-    return render(request, 'core/dashboard.html')
-
-@login_required
+@csrf_exempt
 def Logout(request):
+    # Perform the logout operation
     logout(request)
+    
+    # Check if the request is AJAX
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # For AJAX requests, return a JSON response
+        return JsonResponse({'status': 'success', 'message': 'Logged out successfully'})
+    
+    # For non-AJAX requests, redirect to login
     return redirect('login')
+
+# Custom Error Views
+def error_400_view(request, exception=None):
+    return render(request, 'core/errors/400.html', status=400)
+
+def error_403_view(request, exception=None):
+    return render(request, 'core/errors/403.html', status=403)
+
+def error_404_view(request, exception=None):
+    return render(request, 'core/errors/404.html', status=404)
+
+def error_500_view(request):
+    return render(request, 'core/errors/500.html', status=500)
+
+class CustomLoginView(LoginView):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('core:main_dashboard')  # Redirect to home if already logged in
+        return super().dispatch(request, *args, **kwargs)

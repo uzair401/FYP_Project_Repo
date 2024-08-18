@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        thead {
+            background-color: #f2f2f2;
+        }
+        .nested-table {
+            margin-top: 10px;
+        }
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        body {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <td><strong>Name: </strong></td>
+            <td><strong>{{ student.first_name }} {{ student.last_name }}</strong></td>
+        </tr>
+        <tr>
+            <td><strong>Registration #: </strong></td>
+            <td><strong>{{ student.registration_number }}</strong></td>
+        </tr>
+        <tr>
+            <td><strong>Batch: </strong></td>
+            <td><strong>{{ student.batch.batch_name }}</strong></td>
+        </tr>
+        <tr>
+            <td><strong>Program: </strong></td>
+            <td><strong>{{ student.program.program_name }}</strong></td>
+        </tr>
+    </table>
+
+    {% for semester_number, semester_data in semester_records.items %}
+        <table class="nested-table">
+            <thead>
+                <tr>
+                    <th colspan="7">
+                        Semester {{ semester_data.semesternumber }} - {{ semester_data.semester_category }} ({{ semester_data.exam_date|date:"Y" }})
+                    </th>
+                </tr>
+                <tr>
+                    <th>Course Name</th>
+                    <th>Course Code</th>
+                    <th>Credit Hours</th>
+                    <th>Obtained Marks</th>
+                    <th>Total Marks</th>
+                    <th>Obtained GPA</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course_name, course_data in semester_data.courses.items %}
+                    <tr>
+                        <td>{{ course_data.course_name }}</td>
+                        <td>{{ course_data.course_code }}</td>
+                        <td>{{ course_data.credit_hours }}</td>
+                        <td>{{ course_data.obtained_marks }}</td>
+                        <td>{{ course_data.total_marks }}</td>
+                        <td>{{ course_data.gpa_per_course }}</td>
+                        <td>{% if course_data.is_repeated == 'Yes' %}*{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2"><strong>Total :</strong></td>
+                    <td>{{ semester_data.total_credit_hours }}</td>
+                    <td>{{ semester_data.total_obtained_marks }}</td>
+                    <td>{{ semester_data.total_semester_marks }}</td>
+                    <td>{{ semester_data.gpa_per_semester }}</td>
+                    <td><strong>CGPA:</strong>&nbsp;&nbsp;&nbsp;&nbsp;{{ semester_data.cgpa }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    {% endfor %}
+</body>
+</html>
