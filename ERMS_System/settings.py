@@ -61,7 +61,7 @@ MIDDLEWARE = [
 ]
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'core.backends.EmailBackend',  # Replace 'myapp' with the actual name of your app
+    'core.backends.EmailBackend',
 ]
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 

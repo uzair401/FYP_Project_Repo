@@ -49,3 +49,20 @@
 </div>
 
 {% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready(function() {
+        $('#students-table').DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+            "order": [[4, "asc"]] // Order by registration number (column 4) in ascending order
+        });
+    });
+</script>
+{% endblock %}
