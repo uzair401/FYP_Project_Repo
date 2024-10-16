@@ -18,6 +18,7 @@ This system enables users to manage students, academic records, examination sche
 - Others: Bootstrap for styling, Django Rest Framework for APIs
 
 <h3>Installation</h3>
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/uzair401/FYP_Project_Repo.git
