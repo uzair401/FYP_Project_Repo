@@ -1,0 +1,133 @@
+{% load adminlte_helpers %}
+{% load static %}
+<!-- Left side column. contains the sidebar -->
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    {% block logo %}
+        <a href="/" class="brand-link">
+            {% block logo_text %}
+            <span class="brand-text font-weight-black" style="display: block; text-align: center; width: 100%;">AWKUM EMS System</span>
+            {% endblock %}
+        </a>
+    {% endblock %}
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Sidebar user panel -->
+        {% block user_panel %}
+        <div class="logo-panel mt-3 pb-3 mb-3 d-flex justify-content-center">
+            <a href="/" class="brand-link" style="display: block; text-align: center;">
+                <img src="{% static 'admin-lte\images\awkumlogo.png' %}" class="img-fluid" alt="AWKUM" style="max-height: 100px; display: inline-block;">
+            </a>
+        </div>
+        {% endblock %}
+
+        <!-- Sidebar menu -->
+        {% block nav_links_ul %}
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                {% block nav_links_outer %}
+                {% block nav_links %}
+                <li class="nav-item">
+                    <a href="{% url 'core:main_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'main_dashboard' %}active{% endif %}">
+                        <i class="nav-icon fas fa-home"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+
+                {% with sub_menu_active=request.resolver_match.url_name|default_if_none:'' %}
+                <!-- Academic Records Menu -->
+                <li class="nav-item has-treeview {% if sub_menu_active in 'Department_dashboard Program_dashboard Semester_dashboard Course_dashboard Student_dashboard Batch_dashboard' %}menu-open{% endif %}">
+                    <a href="#" class="nav-link {% if sub_menu_active in 'Department_dashboard Program_dashboard Semester_dashboard Course_dashboard Student_dashboard Batch_dashboard' %}active{% endif %}">
+                        <i class="nav-icon fas fa-book"></i>
+                        <p>
+                            Academic Records
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        {% if request.user.role in 'Admin Faculty' %}
+                        <li class="nav-item">
+                            <a href="{% url 'academics:Department_dashboard' %}" class="nav-link {% if sub_menu_active == 'Department_dashboard' %}active{% endif %}">
+                                <i class="nav-icon fas fa-building"></i>
+                                <p>Departments</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'academics:Program_dashboard' %}" class="nav-link {% if sub_menu_active == 'Program_dashboard' %}active{% endif %}">
+                                <i class="nav-icon fas fa-graduation-cap"></i>
+                                <p>Programs</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'academics:Batch_dashboard' %}" class="nav-link {% if sub_menu_active == 'Batch_dashboard' %}active{% endif %}">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>Batches</p>
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a href="{% url 'academics:Course_dashboard' %}" class="nav-link {% if sub_menu_active == 'Course_dashboard' %}active{% endif %}">
+                                <i class="nav-icon fas fa-book"></i>
+                                <p>Courses</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'students:Student_dashboard' %}" class="nav-link {% if sub_menu_active == 'Student_dashboard' %}active{% endif %}">
+                                <i class="nav-icon fas fa-user-graduate"></i>
+                                <p>Students</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Examinations Menu -->
+                <li class="nav-item has-treeview {% if sub_menu_active in 'results_dash Exam_dashboard semester_record_dashboard records_batches record_semester semester_results courses_record_dashboard course_records_batches courses_semesters courses_record course_results Transcript_Program Transcript_Batch Transcript_students student_transcript student_transcript_pdf' %}menu-open{% endif %}">
+                    <a href="#" class="nav-link {% if sub_menu_active in 'results_dash Exam_dashboard semester_record_dashboard records_batches record_semester semester_results courses_record_dashboard course_records_batches courses_semesters courses_record course_results Transcript_Program Transcript_Batch Transcript_students student_transcript student_transcript_pdf' %}active{% endif %}">
+                        <i class="nav-icon fas fa-clipboard"></i>
+                        <p>
+                            Examinations
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{% url 'records:Exam_dashboard' %}" class="nav-link {% if sub_menu_active == 'Exam_dashboard' %}active{% endif %}">
+                                <i class="nav-icon fas fa-clipboard"></i>
+                                <p>Exam Records</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'records:results_dash' %}" class="nav-link {% if sub_menu_active in 'semester_record_dashboard results_dash records_batches record_semester semester_results courses_record_dashboard course_records_batches courses_semesters courses_record course_results Transcript_Program Transcript_Batch Transcript_students student_transcript student_transcript_pdf' %}active{% endif %}">
+                                <i class="nav-icon fas fa-clipboard-check"></i>
+                                <p>Results</p>
+                            </a>
+                        </li>
+                    </ul>  <!-- Close the nav-treeview ul here -->
+                </li>
+
+                {% if request.user.role in 'Admin Faculty' %}
+                <li class="nav-item">
+                    <a href="{% url 'core:users_dashboard' %}" class="nav-link {% if sub_menu_active == 'users_dashboard' %}active{% endif %}">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>Users Management</p>
+                    </a>
+                </li>
+                {% endif %}
+{% comment %}                 
+                {% if request.user.role in 'Admin Faculty' %}
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-desktop"></i>
+                        <p>Online Portal</p>
+                    </a>
+                </li>
+                {% endif %} {% endcomment %}
+                {% endwith %}
+                {% endblock nav_links %}
+                {% endblock nav_links_outer %}
+            </ul>
+        </nav>
+        {% endblock nav_links_ul %}
+    </div>
+    <!-- /.sidebar -->
+</aside>
