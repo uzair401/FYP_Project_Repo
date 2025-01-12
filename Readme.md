@@ -25,14 +25,11 @@ This system enables users to manage students, academic records, examination reco
 
 ## Images
 
- Login Page
-https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image_original.png
-Department's Overview
-https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image%203.png
-Programs Overview 
-https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image%204.png
-Students Overview 
-https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image%205.png
+![Login Page](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image_original.png)
+![Department's Overview](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image%203.png)
+![Programs Overview](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image%204.png)
+![Students Overview](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image%205.png)
+
 
 
 ## Installation
