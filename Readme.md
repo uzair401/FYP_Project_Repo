@@ -23,6 +23,18 @@ This system enables users to manage students, academic records, examination reco
 - Database: PostgreSQL
 - Others: AdminLTE 3 Bootstrap Theme for consistent and responsive design.
 
+## Images
+
+ Login Page
+https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image_original.png
+Department's Overview
+https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image%203.png
+Programs Overview 
+https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image%204.png
+Students Overview 
+https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image%205.png
+
+
 ## Installation
 
 1. Clone the repository:
@@ -102,7 +114,6 @@ FYP_Project_Repo/
 └── manage.py                 # Django management script
 ```
 
-![Example Image](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image%203.png)
 
 
 
