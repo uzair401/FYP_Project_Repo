@@ -102,6 +102,9 @@ FYP_Project_Repo/
 └── manage.py                 # Django management script
 ```
 
+![Example Image](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image%203.png)
+
+
 
 ## Module Descriptions
 ### ERMS_System
