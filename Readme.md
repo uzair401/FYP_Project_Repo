@@ -102,7 +102,7 @@ FYP_Project_Repo/
 └── manage.py                 # Django management script
 ```
 
-![Example Image](templates/images/image 3.png)
+[Example Image](templates/images/image 3.png)
 
 
 
