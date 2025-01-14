@@ -1,4 +1,6 @@
 # Examination Management System (EMS)
+[Live Deployed Link](http://34.201.215.161/)
+Log in using the username "admin" and the password "admin" as credentials.
 
 ## Overview
 The Examination Management System (EMS) is a web application designed to facilitate the management of examination-related activities in educational institutions specefically for College and Universities. 
@@ -37,6 +39,23 @@ This system enables users to manage students, academic records, examination reco
 ### Students Overview
 ![Students Overview](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/image%205.png)
 
+### Total Exam Records Overview
+![Students Overview](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/Exams%20Records.png)
+
+### Batch Semester Results
+![Students Overview](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/semester.png)
+
+### Single Course Results 
+![Students Overview](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/Course%20results.png)
+
+### Students Marks Filling section (individual Course)
+![Students Overview](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/Marks%20Filling.png)
+
+### Student Transcript results
+![Students Overview](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/Transcript.png)
+
+### User Management Module
+![Students Overview](https://github.com/uzair401/FYP_Project_Repo/blob/master/templates/images/Users%20Managment.png)
 
 
 
