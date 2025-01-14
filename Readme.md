@@ -3,7 +3,7 @@
 Log in using the username "admin" and the password "admin" as credentials.
 
 ## Overview
-The Examination Management System (EMS) is a web application designed to facilitate the management of examination-related activities in educational institutions specefically for College and Universities. 
+The Examination Management System (EMS) is a web application designed to facilitate the management of examination-related activities in educational institutions specifically for colleges and universities. 
 This system enables users to manage students, academic records, examination records, and results efficiently.
 
 ## Features
@@ -17,7 +17,7 @@ This system enables users to manage students, academic records, examination reco
 
 - Results and Reports: Manages hierarchical results, providing individual course results, semester results, and student transcripts for respective batches in programs.
 
-- User Management: Oversees user accounts, creating roles for Editors with view and update access to specific data, Faculty with department-level access, and Administrators with comprehensive system-level access.
+- User Management: oversee user accounts, creating roles for Editors with view and update access to specific data, Faculty with department-level access, and Administrators with comprehensive system-level access.
 
 ## Technologies Used
 - Backend: Python, Django
@@ -78,22 +78,22 @@ This system enables users to manage students, academic records, examination reco
    pip install -r requirements.txt
    ```
 
-3. Setup Permissions:
+4. Setup Permissions:
    ```bash
    python manage.py setup_groups_and_permissions
    ```
 
-4. Apply migrations:
+5. Apply migrations:
    ```bash
    python manage.py migrate
    ```
 
-5. Run the development server:
+6. Run the development server:
    ```bash
    python manage.py runserver
    ```
 
-6. Access the application: Open your web browser and navigate to `http://127.0.0.1:8000`.
+7. Access the application: Open your web browser and navigate to `http://127.0.0.1:8000`.
 
 ## Folder Structure
 ```
